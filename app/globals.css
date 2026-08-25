@@ -103,4 +103,28 @@
   html {
     @apply font-sans;
   }
+
+  /* Thin, theme-aware scrollbars everywhere. Dialog/sheet forms reserve a
+     4px gutter for their scrollbar via a `-mr-1 ... pr-1` margin trick (see
+     e.g. create-task-dialog.tsx) so fields don't shift when a scrollbar
+     appears -- a full-width native scrollbar (the default on Windows/Linux,
+     or macOS set to "always show scrollbars") is wider than that gutter and
+     makes the scrollable content sit visibly inset from the dialog's
+     header/footer. Matching the real scrollbar width to the gutter fixes
+     that everywhere at once instead of per-dialog. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+  }
 }

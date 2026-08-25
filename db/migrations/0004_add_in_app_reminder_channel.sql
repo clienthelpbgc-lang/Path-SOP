@@ -1,0 +1,1 @@
+ALTER TYPE "public"."reminder_channel" ADD VALUE 'in_app' BEFORE 'whatsapp';

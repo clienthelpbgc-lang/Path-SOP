@@ -1,10 +1,12 @@
 import {
-  CalendarClock,
-  CalendarRange,
+  Gauge,
   LayoutDashboard,
-  ListChecks,
+  LayoutTemplate,
+  ListTodo,
   ShieldCheck,
+  Target,
   UserCircle,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,10 +21,18 @@ export type NavItem = {
 
 export const NAV_ITEMS: NavItem[] = [
   { title: "Dashboard", href: "/", icon: LayoutDashboard },
-  { title: "Daily Tasks", href: "/daily-tasks", icon: ListChecks },
-  { title: "Weekly KRA's", href: "/weekly-kras", icon: CalendarRange },
-  { title: "Monthly KRA's", href: "/monthly-kras", icon: CalendarClock },
+  {
+    title: "Admin Dashboard",
+    href: "/admin-dashboard",
+    icon: Gauge,
+    roles: ["ADMIN"],
+  },
+  { title: "My Task", href: "/tasks", icon: ListTodo },
   { title: "Task Admin", href: "/task-admin", icon: ShieldCheck, roles: ["ADMIN"] },
+  { title: "My KRA", href: "/kra", icon: Target },
+  { title: "KRA Admin", href: "/kra-admin", icon: ShieldCheck, roles: ["ADMIN"] },
+  { title: "Templates", href: "/templates", icon: LayoutTemplate },
+  { title: "Team Members", href: "/team-members", icon: Users },
   { title: "Profile", href: "/profile", icon: UserCircle },
 ];
 
@@ -34,7 +44,9 @@ export function getPageTitle(pathname: string): string {
   if (pathname === "/") return "Dashboard";
 
   const match = NAV_ITEMS.find(
-    (item) => item.href !== "/" && pathname.startsWith(item.href),
+    (item) =>
+      item.href !== "/" &&
+      (pathname === item.href || pathname.startsWith(`${item.href}/`)),
   );
 
   return match?.title ?? "Path SOP";

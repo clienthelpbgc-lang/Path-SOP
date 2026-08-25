@@ -71,7 +71,8 @@ export function SidebarContent({
             const isActive =
               item.href === "/"
                 ? pathname === "/"
-                : pathname.startsWith(item.href);
+                : pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
 
             return (
               <li key={item.href}>

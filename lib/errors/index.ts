@@ -5,6 +5,7 @@ export * from "./conflict.error";
 export * from "./forbidden.error";
 export * from "./internal.error";
 export * from "./not-found.error";
+export * from "./rate-limit.error";
 export * from "./validation.error";
 export * from "./db-error";
 export * from "./supabase-auth-error";

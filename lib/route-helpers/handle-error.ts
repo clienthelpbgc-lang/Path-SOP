@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AppError } from "@/lib/errors";
+import { AppError, RateLimitError } from "@/lib/errors";
 
 export function handleError(error: unknown) {
   console.error(error);
@@ -14,7 +14,13 @@ export function handleError(error: unknown) {
           details: error.details,
         },
       },
-      { status: error.status },
+      {
+        status: error.status,
+        headers:
+          error instanceof RateLimitError
+            ? { "Retry-After": String(error.retryAfterSeconds) }
+            : undefined,
+      },
     );
   }
 

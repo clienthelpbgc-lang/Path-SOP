@@ -1,9 +1,10 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { db } from "@/db";
+import { runInTenantScope } from "@/db/tenant-context";
 import { companies } from "@/features/company/schema";
 import type { UserRole } from "@/features/user/constants/role.constant";
 import { users } from "@/features/user/schema";
@@ -35,25 +36,36 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser> => {
     throw new AuthError("Please login first.");
   }
 
-  const [row] = await db
-    .select({
-      user: users,
-      company: {
-        id: companies.id,
-        name: companies.name,
-        logo: companies.logo,
-      },
-    })
-    .from(users)
-    .innerJoin(companies, eq(users.companyId, companies.id))
-    .where(eq(users.id, authUser.id))
-    .limit(1);
+  return runInTenantScope(async () => {
+    // RLS trust anchor: every tenant table's policy derives the caller's
+    // company from this via the current_company_id() SQL function, so it
+    // must be set before any other query runs in this transaction. Reentrant
+    // -- if a route handler already opened this scope, this just re-sets the
+    // same value on the already-open transaction.
+    await db.execute(
+      sql`select set_config('app.user_id', ${authUser.id}, true)`,
+    );
 
-  if (!row) {
-    throw new AuthError("Your account could not be found.");
-  }
+    const [row] = await db
+      .select({
+        user: users,
+        company: {
+          id: companies.id,
+          name: companies.name,
+          logo: companies.logo,
+        },
+      })
+      .from(users)
+      .innerJoin(companies, eq(users.companyId, companies.id))
+      .where(eq(users.id, authUser.id))
+      .limit(1);
 
-  return { ...row.user, company: row.company };
+    if (!row) {
+      throw new AuthError("Your account could not be found.");
+    }
+
+    return { ...row.user, company: row.company };
+  });
 });
 
 export async function getCurrentCompanyId(): Promise<string> {

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { companies } from "@/features/company/schema";
 import type { Company, CreateCompanyInput } from "@/features/company/types";
 import { createCompanySchema } from "@/features/company/validation";
@@ -20,7 +20,7 @@ export async function createCompany(
   }
 
   try {
-    const [company] = await db
+    const [company] = await systemDb
       .insert(companies)
       .values(result.data)
       .returning();

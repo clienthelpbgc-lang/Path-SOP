@@ -1,7 +1,7 @@
 import { and, count, desc, eq, ilike } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { companies } from "@/features/company/schema";
 import type { Company, ListCompaniesQueryInput } from "@/features/company/types";
 import { listCompaniesQuerySchema } from "@/features/company/validation";
@@ -32,14 +32,14 @@ export async function getAllCompanies(
 
   try {
     const [data, [{ total }]] = await Promise.all([
-      db
+      systemDb
         .select()
         .from(companies)
         .where(where)
         .orderBy(desc(companies.createdAt))
         .limit(limit)
         .offset((page - 1) * limit),
-      db.select({ total: count() }).from(companies).where(where),
+      systemDb.select({ total: count() }).from(companies).where(where),
     ]);
 
     return {

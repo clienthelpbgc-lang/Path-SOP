@@ -49,6 +49,19 @@ export const updateUserSchema = createUserSchema.partial().refine(
   { error: "At least one field must be provided to update the user." },
 );
 
+export const updateUserRoleSchema = z.object({
+  role: roleSchema,
+});
+
+export const updateProfileSchema = z
+  .object({
+    name: nameSchema.optional(),
+    phone: phoneSchema.or(z.literal("")).optional(),
+  })
+  .refine((data) => data.name !== undefined || data.phone !== undefined, {
+    error: "At least one field must be provided to update your profile.",
+  });
+
 export const listUsersQuerySchema = z.object({
   page: z.coerce
     .number({ error: "Page must be a number." })

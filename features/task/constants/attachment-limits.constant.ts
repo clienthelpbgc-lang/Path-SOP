@@ -1,0 +1,3 @@
+export const MAX_TASK_ATTACHMENTS = 5;
+
+export const MAX_ATTACHMENT_SIZE_BYTES = 100 * 1024 * 1024;

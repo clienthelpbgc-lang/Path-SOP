@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { companies } from "@/features/company/schema";
 import type { Company, UpdateCompanyInput } from "@/features/company/types";
 import {
@@ -34,7 +34,7 @@ export async function updateCompany(
   }
 
   try {
-    const [company] = await db
+    const [company] = await systemDb
       .update(companies)
       .set(inputResult.data)
       .where(eq(companies.id, idResult.data))

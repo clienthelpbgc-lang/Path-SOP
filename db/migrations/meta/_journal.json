@@ -15,6 +15,55 @@
       "when": 1785273808283,
       "tag": "0001_flaky_dragon_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786516019429,
+      "tag": "0002_remove_daily_task_and_performance_task",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786643949729,
+      "tag": "0003_sloppy_edwin_jarvis",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787065303747,
+      "tag": "0004_add_in_app_reminder_channel",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787066515942,
+      "tag": "0005_remove_in_app_reminder_channel",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787549343142,
+      "tag": "0006_add_kras",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1787565837937,
+      "tag": "0007_enable_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787597230944,
+      "tag": "0008_add_kra_templates",
+      "breakpoints": true
     }
   ]
 }

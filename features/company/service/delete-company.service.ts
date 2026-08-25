@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { companies } from "@/features/company/schema";
 import type { Company } from "@/features/company/types";
 import { companyIdSchema } from "@/features/company/validation";
@@ -19,7 +19,7 @@ export async function deleteCompany(id: string): Promise<Company> {
   }
 
   try {
-    const [company] = await db
+    const [company] = await systemDb
       .update(companies)
       .set({ isActive: false })
       .where(eq(companies.id, idResult.data))

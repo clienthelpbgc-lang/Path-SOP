@@ -30,12 +30,18 @@ export async function apiFetch<T>(
   input: string,
   init?: RequestInit,
 ): Promise<T> {
+  // FormData bodies (file uploads) must keep the browser-generated
+  // multipart boundary in Content-Type, so don't override it with JSON.
+  const isFormData = init?.body instanceof FormData;
+
   const response = await fetch(input, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
+    headers: isFormData
+      ? init?.headers
+      : {
+          "Content-Type": "application/json",
+          ...init?.headers,
+        },
   });
 
   const body = (await response.json()) as ApiResponse<T>;
