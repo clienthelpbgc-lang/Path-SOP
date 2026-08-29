@@ -64,6 +64,20 @@
       "when": 1787597230944,
       "tag": "0008_add_kra_templates",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787852566020,
+      "tag": "0009_blue_killer_shrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787852926495,
+      "tag": "0010_enable_platform_admins_rls",
+      "breakpoints": true
     }
   ]
 }

@@ -41,12 +41,16 @@ export const updateSession = async (request: NextRequest) => {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isApiRoute = pathname.startsWith("/api");
+  const isApiRoute =
+    pathname.startsWith("/api") || pathname.startsWith("/.netlify/functions");
   const isPublicPath = PUBLIC_PATHS.includes(pathname);
 
   // Route Handlers enforce their own auth (via lib/session.ts) and return
   // JSON 401s; redirecting them to an HTML login page would break API
-  // clients, so only page routes are gated here.
+  // clients, so only page routes are gated here. Netlify Scheduled
+  // Functions (netlify/functions/*) are invoked directly at
+  // /.netlify/functions/* by Netlify's scheduler, not through the app's own
+  // routes, but they hit this same proxy first -- same reasoning applies.
   if (!user && !isApiRoute && !isPublicPath) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

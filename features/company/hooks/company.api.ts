@@ -1,8 +1,10 @@
 import { apiFetch } from "@/lib/api-client";
 import type {
   Company,
-  CreateCompanyInput,
+  CompanyDetail,
   ListCompaniesQueryInput,
+  OnboardTenantInput,
+  OnboardTenantResult,
   UpdateCompanyInput,
 } from "@/features/company/types";
 import type { PaginatedResult } from "@/utils/types";
@@ -29,11 +31,15 @@ export function getCompanies(query: ListCompaniesQueryInput = {}) {
   );
 }
 
-export function createCompanyRequest(input: CreateCompanyInput) {
-  return apiFetch<Company>(BASE_URL, {
+export function onboardTenantRequest(input: OnboardTenantInput) {
+  return apiFetch<OnboardTenantResult>(BASE_URL, {
     method: "POST",
     body: JSON.stringify(input),
   });
+}
+
+export function getCompanyRequest(id: string) {
+  return apiFetch<CompanyDetail>(`${BASE_URL}/${id}`);
 }
 
 export function updateCompanyRequest(id: string, input: UpdateCompanyInput) {
@@ -47,4 +53,29 @@ export function deleteCompanyRequest(id: string) {
   return apiFetch<Company>(`${BASE_URL}/${id}`, {
     method: "DELETE",
   });
+}
+
+export type UploadedCompanyLogo = {
+  fileKey: string;
+  url: string;
+  fileName: string;
+  mimeType?: string;
+  sizeBytes?: number;
+};
+
+export function uploadCompanyLogoRequest(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiFetch<UploadedCompanyLogo>(`${BASE_URL}/logo-upload`, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export function deleteUploadedCompanyLogoRequest(fileKey: string) {
+  return apiFetch<{ fileKey: string }>(
+    `${BASE_URL}/logo-upload?fileKey=${encodeURIComponent(fileKey)}`,
+    { method: "DELETE" },
+  );
 }

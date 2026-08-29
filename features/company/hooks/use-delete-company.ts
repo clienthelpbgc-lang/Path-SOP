@@ -17,13 +17,13 @@ export function useDeleteCompany() {
       queryClient.invalidateQueries({
         queryKey: companyKeys.detail(company.id),
       });
-      toast.success(`"${company.name}" was deactivated successfully.`);
+      toast.success(`"${company.name}" was deleted successfully.`);
     },
     onError: (error) => {
       toast.error(
         error instanceof ApiClientError
           ? error.message
-          : "Failed to deactivate company. Please try again.",
+          : "Failed to delete company. Please try again.",
       );
     },
   });

@@ -118,13 +118,6 @@ export type GenerateRecurringTasksResult = {
   failedTaskIds: string[];
 };
 
-/**
- * Finds every repeating task whose `nextRunAt` has arrived and spawns its
- * next occurrence. Meant to be invoked periodically (see
- * app/api/cron/generate-recurring-tasks/route.ts) rather than from request
- * handlers directly. Each task is isolated in its own transaction so one
- * failure doesn't block the rest of the batch.
- */
 export async function generateRecurringTasks(
   now: Date = new Date(),
 ): Promise<GenerateRecurringTasksResult> {

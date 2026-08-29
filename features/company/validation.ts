@@ -42,6 +42,23 @@ export const createCompanySchema = z.object({
   isActive: isActiveSchema.default(true),
 });
 
+const adminPasswordSchema = z
+  .string({ error: "Password is required." })
+  .min(8, "Password must be at least 8 characters long.")
+  .regex(/[A-Za-z]/, "Password must contain at least one letter.")
+  .regex(/[0-9]/, "Password must contain at least one number.");
+
+// Onboarding a tenant means creating its company row *and* the first
+// company-admin user in one step -- a company with no users is unusable, and
+// only a platform admin (see lib/platform-session.ts) can reach this schema.
+export const onboardTenantSchema = createCompanySchema.extend({
+  admin: z.object({
+    name: nameSchema,
+    email: emailSchema,
+    password: adminPasswordSchema,
+  }),
+});
+
 export const updateCompanySchema = createCompanySchema
   .partial()
   .refine((data) => Object.keys(data).length > 0, {
