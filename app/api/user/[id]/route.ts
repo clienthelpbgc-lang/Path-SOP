@@ -1,5 +1,5 @@
 import { routeHandler } from "@/lib/route-helpers/route-handler";
-import { deleteUser, updateUserRole } from "@/features/user/service";
+import { deleteUser, updateUserRole, updateUserStatus } from "@/features/user/service";
 import { getCurrentUser } from "@/lib/session";
 
 type UserRouteContext = {
@@ -11,6 +11,16 @@ export const PATCH = routeHandler<unknown, UserRouteContext>(
     const currentUser = await getCurrentUser();
     const { id } = await context.params;
     const body = await request.json();
+
+    if (typeof body === "object" && body !== null && "isActive" in body) {
+      return updateUserStatus(
+        currentUser.companyId,
+        currentUser.id,
+        currentUser.role,
+        id,
+        body,
+      );
+    }
 
     return updateUserRole(
       currentUser.companyId,

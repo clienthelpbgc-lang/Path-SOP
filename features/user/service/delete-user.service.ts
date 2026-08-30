@@ -6,7 +6,13 @@ import type { UserRole } from "@/features/user/constants/role.constant";
 import { users } from "@/features/user/schema";
 import type { User } from "@/features/user/types";
 import { userIdSchema } from "@/features/user/validation";
-import { tasks } from "@/features/task/schema";
+import {
+  taskAttachments,
+  taskChecklistItems,
+  taskTemplates,
+  tasks,
+} from "@/features/task/schema";
+import { kraTemplates, kras } from "@/features/kra/schema";
 import {
   ConflictError,
   ForbiddenError,
@@ -53,6 +59,87 @@ export async function deleteUser(
   if (linkedTask) {
     throw new ConflictError(
       "This user has assigned or created tasks. Reassign or remove those tasks before deleting the user.",
+    );
+  }
+
+  const [linkedKra] = await db
+    .select({ id: kras.id })
+    .from(kras)
+    .where(
+      and(
+        eq(kras.companyId, companyId),
+        or(eq(kras.assignedTo, idResult.data), eq(kras.assignedBy, idResult.data)),
+      ),
+    )
+    .limit(1);
+
+  if (linkedKra) {
+    throw new ConflictError(
+      "This user has assigned or created KRAs. Reassign or remove those KRAs before deleting the user.",
+    );
+  }
+
+  const [linkedKraTemplate] = await db
+    .select({ id: kraTemplates.id })
+    .from(kraTemplates)
+    .where(
+      and(
+        eq(kraTemplates.companyId, companyId),
+        or(
+          eq(kraTemplates.defaultAssignee, idResult.data),
+          eq(kraTemplates.createdBy, idResult.data),
+        ),
+      ),
+    )
+    .limit(1);
+
+  if (linkedKraTemplate) {
+    throw new ConflictError(
+      "This user is referenced by KRA templates. Update those templates before deleting the user.",
+    );
+  }
+
+  const [linkedTaskTemplate] = await db
+    .select({ id: taskTemplates.id })
+    .from(taskTemplates)
+    .where(
+      and(
+        eq(taskTemplates.companyId, companyId),
+        or(
+          eq(taskTemplates.defaultAssignee, idResult.data),
+          eq(taskTemplates.createdBy, idResult.data),
+        ),
+      ),
+    )
+    .limit(1);
+
+  if (linkedTaskTemplate) {
+    throw new ConflictError(
+      "This user is referenced by task templates. Update those templates before deleting the user.",
+    );
+  }
+
+  const [linkedAttachment] = await db
+    .select({ id: taskAttachments.id })
+    .from(taskAttachments)
+    .where(eq(taskAttachments.uploadedBy, idResult.data))
+    .limit(1);
+
+  if (linkedAttachment) {
+    throw new ConflictError(
+      "This user has uploaded task attachments. Remove those attachments before deleting the user.",
+    );
+  }
+
+  const [linkedChecklistItem] = await db
+    .select({ id: taskChecklistItems.id })
+    .from(taskChecklistItems)
+    .where(eq(taskChecklistItems.doneBy, idResult.data))
+    .limit(1);
+
+  if (linkedChecklistItem) {
+    throw new ConflictError(
+      "This user is recorded as completing task checklist items. Clear those records before deleting the user.",
     );
   }
 

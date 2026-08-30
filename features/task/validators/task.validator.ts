@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { MAX_TASK_ATTACHMENTS } from "@/features/task/constants/attachment-limits.constant";
+import { START_DATE_PAST_TOLERANCE_MS } from "@/features/task/constants/start-date-tolerance.constant";
 import { TASK_STATUSES } from "@/features/task/constants/task-status.constant";
 
 import {
@@ -72,7 +73,10 @@ function checkStartNotPast(
   data: { startAt?: Date },
   ctx: z.RefinementCtx,
 ) {
-  if (data.startAt && data.startAt < new Date()) {
+  if (
+    data.startAt &&
+    data.startAt.getTime() < Date.now() - START_DATE_PAST_TOLERANCE_MS
+  ) {
     ctx.addIssue({
       code: "custom",
       path: ["startAt"],

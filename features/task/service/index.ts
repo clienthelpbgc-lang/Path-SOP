@@ -1,5 +1,6 @@
 export * from "./create-task-attachment.service";
 export * from "./create-task-checklist-item.service";
+export * from "./create-task-reminder.service";
 export * from "./create-task-template.service";
 export * from "./create-task-watcher.service";
 export * from "./create-task-with-relations.service";

@@ -9,9 +9,11 @@ import type { z } from "zod";
 import {
   useCreateTaskAttachment,
   useCreateTaskChecklistItem,
+  useCreateTaskReminder,
   useCreateTaskWatcher,
   useDeleteTaskAttachment,
   useDeleteTaskChecklistItem,
+  useDeleteTaskReminder,
   useDeleteTaskWatcher,
   useTask,
   useUpdateTask,
@@ -27,6 +29,10 @@ import {
   type AttachmentItem,
 } from "@/components/task/task-attachments-field";
 import { WEIGHTAGE_OPTIONS } from "@/components/task/task-form-constants";
+import {
+  ReminderFieldset,
+  type ReminderDraft,
+} from "@/components/task/reminder-fieldset";
 import { TaskRepeatFieldset } from "@/components/task/task-repeat-fieldset";
 import { WatchersCombobox } from "@/components/task/watchers-combobox";
 import { Button } from "@/components/ui/button";
@@ -53,6 +59,21 @@ import { formatFileSize } from "@/lib/format-file-size";
 
 type FormInput = z.input<typeof editTaskFormSchema>;
 type FormOutput = z.output<typeof editTaskFormSchema>;
+
+// Existing reminders carry their `id` so the submit handler can tell which
+// ones were removed; ones added in this session don't have one yet.
+type EditableReminder = ReminderDraft & { id?: string };
+
+function initialReminders(task: TaskWithRelations): EditableReminder[] {
+  return task.reminders
+    .filter((reminder) => reminder.status === "scheduled")
+    .map((reminder) => ({
+      id: reminder.id,
+      channel: reminder.channel,
+      anchor: reminder.anchor,
+      offsetMinutes: reminder.offsetMinutes,
+    }));
+}
 
 function defaultValues(task: TaskWithRelations): FormInput {
   return {
@@ -124,6 +145,9 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
   const [removedAttachmentIds, setRemovedAttachmentIds] = useState<
     Set<string>
   >(new Set());
+  const [reminders, setReminders] = useState<EditableReminder[]>(() =>
+    initialReminders(task),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutateAsync: updateTask } = useUpdateTask();
@@ -134,6 +158,8 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
   const { mutateAsync: deleteWatcher } = useDeleteTaskWatcher();
   const { mutateAsync: createAttachment } = useCreateTaskAttachment();
   const { mutateAsync: deleteAttachment } = useDeleteTaskAttachment();
+  const { mutateAsync: createReminder } = useCreateTaskReminder();
+  const { mutateAsync: deleteReminder } = useDeleteTaskReminder();
 
   const {
     control,
@@ -147,6 +173,8 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
   });
 
   const assignedTo = useWatch({ control, name: "assignedTo" });
+  const startAt = useWatch({ control, name: "startAt" });
+  const dueAt = useWatch({ control, name: "dueAt" });
   const isRepeating = useWatch({ control, name: "isRepeating" });
   const repeatUnit = useWatch({ control, name: "repeatUnit" });
   const repeatInterval = useWatch({ control, name: "repeatInterval" });
@@ -288,6 +316,31 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
       for (const userId of values.watcherIds) {
         if (!originalWatcherIds.has(userId)) {
           await createWatcher({ taskId: task.id, userId });
+        }
+      }
+
+      const keptReminderIds = new Set(
+        reminders
+          .map((reminder) => reminder.id)
+          .filter((id): id is string => !!id),
+      );
+
+      for (const original of initialReminders(task)) {
+        if (original.id && !keptReminderIds.has(original.id)) {
+          await deleteReminder({ taskId: task.id, reminderId: original.id });
+        }
+      }
+
+      for (const reminder of reminders) {
+        if (!reminder.id) {
+          await createReminder({
+            taskId: task.id,
+            input: {
+              channel: reminder.channel,
+              anchor: reminder.anchor,
+              offsetMinutes: reminder.offsetMinutes,
+            },
+          });
         }
       }
 
@@ -567,6 +620,13 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
             repeatDaysOfWeek: errors.repeatDaysOfWeek?.message,
             repeatEndsAt: errors.repeatEndsAt?.message,
           }}
+        />
+
+        <ReminderFieldset
+          reminders={reminders}
+          onChange={(next) => setReminders(next as EditableReminder[])}
+          startAt={startAt as Date}
+          dueAt={dueAt as Date}
         />
 
         <div className="flex flex-col gap-1.5">

@@ -9,6 +9,7 @@ export * from "./update-task-checklist-item.type";
 export * from "./task-attachment.type";
 export * from "./create-task-attachment.type";
 export * from "./task-reminder.type";
+export * from "./create-task-reminder.type";
 export * from "./update-task-reminder.type";
 export * from "./task-watcher.type";
 export * from "./create-task-watcher.type";

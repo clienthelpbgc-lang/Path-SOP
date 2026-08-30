@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { Loader2, Plus, Users, X } from "lucide-react";
@@ -112,7 +118,7 @@ export function CreateTaskDialog({
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(createTaskFormSchema),
     defaultValues: defaultValues(template),
@@ -250,6 +256,20 @@ export function CreateTaskDialog({
     (item) => item.status === "uploading",
   );
 
+  // `startAt` defaults to the moment the dialog opened, which can go stale
+  // by the time the user actually submits (filling out the rest of the
+  // form takes a minute or two) and trip the "must not be in the past"
+  // check below. If the user never touched the field, refresh it to the
+  // actual current time right before validation runs instead of trusting
+  // the frozen default.
+  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+    if (!dirtyFields.startAt) {
+      setValue("startAt", new Date());
+    }
+
+    return handleSubmit(onSubmit)(event);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {!isControlled && (
@@ -271,10 +291,7 @@ export function CreateTaskDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
-        >
+        <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
           <div className="-mr-1 flex max-h-[65vh] flex-col gap-5 overflow-y-auto pr-1">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="title">Title</Label>

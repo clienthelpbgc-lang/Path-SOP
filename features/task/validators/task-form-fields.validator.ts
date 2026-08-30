@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { REPEAT_UNITS } from "@/features/task/constants/repeat-unit.constant";
+import { START_DATE_PAST_TOLERANCE_MS } from "@/features/task/constants/start-date-tolerance.constant";
 
 export const taskFormOptionalDateSchema = z.preprocess(
   (value) => (value === "" || value === undefined ? undefined : value),
@@ -66,7 +67,7 @@ export function checkTaskFormStartNotPast(
   data: { startAt: Date },
   ctx: z.RefinementCtx,
 ) {
-  if (data.startAt < new Date()) {
+  if (data.startAt.getTime() < Date.now() - START_DATE_PAST_TOLERANCE_MS) {
     ctx.addIssue({
       code: "custom",
       path: ["startAt"],

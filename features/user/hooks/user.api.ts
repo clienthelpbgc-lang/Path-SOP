@@ -57,6 +57,19 @@ export function updateUserRoleRequest({
   });
 }
 
+export function updateUserStatusRequest({
+  id,
+  isActive,
+}: {
+  id: string;
+  isActive: boolean;
+}) {
+  return apiFetch<User>(`${BASE_URL}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ isActive }),
+  });
+}
+
 export function deleteUserRequest(id: string) {
   return apiFetch<User>(`${BASE_URL}/${id}`, {
     method: "DELETE",

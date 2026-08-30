@@ -8,6 +8,7 @@ export * from "./use-delete-task";
 export * from "./use-create-task-checklist-item";
 export * from "./use-update-task-checklist-item";
 export * from "./use-delete-task-checklist-item";
+export * from "./use-create-task-reminder";
 export * from "./use-update-task-reminder";
 export * from "./use-delete-task-reminder";
 export * from "./use-create-task-attachment";

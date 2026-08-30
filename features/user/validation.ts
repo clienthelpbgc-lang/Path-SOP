@@ -53,6 +53,10 @@ export const updateUserRoleSchema = z.object({
   role: roleSchema,
 });
 
+export const updateUserStatusSchema = z.object({
+  isActive: isActiveSchema,
+});
+
 export const updateProfileSchema = z
   .object({
     name: nameSchema.optional(),

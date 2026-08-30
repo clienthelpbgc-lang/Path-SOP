@@ -2,6 +2,7 @@ import { apiFetch } from "@/lib/api-client";
 import type {
   CreateTaskAttachmentInput,
   CreateTaskChecklistItemInput,
+  CreateTaskReminderInput,
   CreateTaskWithRelationsInput,
   ListTasksQueryInput,
   Task,
@@ -90,6 +91,16 @@ export function deleteTaskChecklistItemRequest(taskId: string, itemId: string) {
     `${BASE_URL}/${taskId}/checklist-item/${itemId}`,
     { method: "DELETE" },
   );
+}
+
+export function createTaskReminderRequest(
+  taskId: string,
+  input: Omit<CreateTaskReminderInput, "taskId">,
+) {
+  return apiFetch<TaskReminder>(`${BASE_URL}/${taskId}/reminder`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 export function updateTaskReminderRequest(
