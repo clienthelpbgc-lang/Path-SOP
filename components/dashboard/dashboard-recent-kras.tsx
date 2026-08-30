@@ -1,7 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import { Target } from "lucide-react";
 
 import type { DashboardRecentKra } from "@/features/dashboard/types";
 import { LIST_CARD_HEIGHT } from "@/components/dashboard/constants";
+import { KraDetailsSheet } from "@/components/kra/kra-details-sheet";
 import { KRA_TYPE_LABELS } from "@/components/kra/kra-form-constants";
 import { KraStatusBadge } from "@/components/kra/kra-status-badge";
 import { PagePlaceholder } from "@/components/layout/page-placeholder";
@@ -31,6 +35,8 @@ export function DashboardRecentKras({
 }: {
   kras: DashboardRecentKra[];
 }) {
+  const [selectedKraId, setSelectedKraId] = useState<string | null>(null);
+
   return (
     <Card>
       <CardHeader>
@@ -49,7 +55,11 @@ export function DashboardRecentKras({
           <ScrollArea className={LIST_CARD_HEIGHT}>
             <ul className="flex flex-col gap-4 pr-3">
               {kras.map((kra) => (
-                <li key={kra.id} className="flex items-center gap-3">
+                <li
+                  key={kra.id}
+                  onClick={() => setSelectedKraId(kra.id)}
+                  className="-mx-2 flex cursor-pointer items-center gap-3 rounded-md px-2 py-1 transition-colors hover:bg-muted/40"
+                >
                   <Avatar size="sm">
                     <AvatarFallback
                       className={`text-white ${getAvatarColor(kra.assignedBy.id)}`}
@@ -72,6 +82,12 @@ export function DashboardRecentKras({
           </ScrollArea>
         )}
       </CardContent>
+      <KraDetailsSheet
+        kraId={selectedKraId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedKraId(null);
+        }}
+      />
     </Card>
   );
 }

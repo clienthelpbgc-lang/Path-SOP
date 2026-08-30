@@ -1,13 +1,16 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-import { AdminUserOverview } from "@/components/dashboard/admin/admin-user-overview";
+import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
 import { requireRole } from "@/lib/session";
 
 type AdminUserDashboardPageProps = {
   params: Promise<{ userId: string }>;
 };
 
+// Same dashboard a team member sees for themselves, rendered here for the
+// clicked user instead -- the API already enforces that only an admin (or
+// the member themselves) can request another user's stats.
 export default async function AdminUserDashboardPage({
   params,
 }: AdminUserDashboardPageProps) {
@@ -16,23 +19,19 @@ export default async function AdminUserDashboardPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Link
-          href="/admin-dashboard"
-          className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Admin Dashboard
-        </Link>
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-          Member Overview
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Tasks, KRAs, and performance for this team member.
-        </p>
-      </div>
+      <Link
+        href="/admin-dashboard"
+        className="flex w-fit items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" />
+        Admin Dashboard
+      </Link>
 
-      <AdminUserOverview userId={userId} />
+      <DashboardOverview
+        userId={userId}
+        title="Member Overview"
+        description="Tasks, KRAs, and performance for this team member."
+      />
     </div>
   );
 }

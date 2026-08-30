@@ -8,8 +8,6 @@ import { startOfDay, startOfDaysAgo, startOfNextDay } from "./date-range.util";
 export { DASHBOARD_PERIOD_KEYS, type DashboardPeriodKey };
 
 export type DashboardPeriod = {
-  // `null` start means no lower bound (all_time) -- the query builder skips
-  // the `gte` filter entirely rather than reaching for some arbitrary epoch.
   start: Date | null;
   end: Date;
   label: string;
@@ -25,12 +23,6 @@ const PERIOD_LABELS: Record<DashboardPeriodKey, string> = {
   all_time: "All time",
 };
 
-// All ranges (other than "today") are trailing windows ending today, not
-// calendar-aligned -- e.g. "last month" is the 30-ish days up to now, not
-// the previous calendar month. Simpler to reason about for a live filter
-// than calendar boundaries, and distinct on purpose from the PDF reports'
-// calendar-month periods (features/reports/service/period.util.ts), which
-// are meant to summarize a *completed* period rather than track "as of now".
 function monthsAgo(date: Date, months: number): Date {
   return startOfDay(
     new Date(date.getFullYear(), date.getMonth() - months, date.getDate()),

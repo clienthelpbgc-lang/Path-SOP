@@ -1,11 +1,15 @@
 "use client";
 
-import { useDashboardOverview } from "@/features/dashboard/hooks";
-import { DashboardPeriodPerformance } from "@/components/dashboard/dashboard-period-performance";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { Loader2 } from "lucide-react";
+
+import { useDashboardStats } from "@/features/dashboard/hooks";
+import type { DashboardPeriodKey } from "@/features/dashboard/types";
 import {
-  DashboardLeaderboard,
-  DashboardLeaderboardSkeleton,
-} from "@/components/dashboard/dashboard-leaderboard";
+  AdminOverallLeaderboardCard,
+  AdminOverallLeaderboardCardSkeleton,
+} from "@/components/dashboard/admin/admin-overall-leaderboard-card";
 import {
   DashboardRecentKras,
   DashboardRecentKrasSkeleton,
@@ -19,27 +23,61 @@ import {
   DashboardScoreCardSkeleton,
 } from "@/components/dashboard/dashboard-score-card";
 import {
-  DashboardStatCards,
-  DashboardStatCardsSkeleton,
-} from "@/components/dashboard/dashboard-stat-cards";
+  KraCompletionCard,
+  KraCompletionCardSkeleton,
+} from "@/components/dashboard/kra-completion-card";
+import { PeriodSelector } from "@/components/dashboard/period-selector";
 import {
-  DashboardWeeklyCompletionChart,
-  DashboardWeeklyCompletionChartSkeleton,
-} from "@/components/dashboard/dashboard-weekly-completion-chart";
+  TaskCompletionCard,
+  TaskCompletionCardSkeleton,
+} from "@/components/dashboard/task-completion-card";
+import {
+  TaskCompletionTrendChart,
+  TaskCompletionTrendChartSkeleton,
+} from "@/components/dashboard/task-completion-trend-chart";
+import { cn } from "@/lib/utils";
 
-// One request backs every section below, instead of each one fetching
-// independently.
-export function DashboardOverview({ currentUserId }: { currentUserId: string }) {
-  const { data, isLoading } = useDashboardOverview();
+// One request (scoped to the selected period) backs every section below,
+// instead of each one fetching independently.
+export function DashboardOverview({
+  userId,
+  title,
+  description,
+}: {
+  userId: string;
+  title: ReactNode;
+  description: ReactNode;
+}) {
+  const [period, setPeriod] = useState<DashboardPeriodKey>("last_week");
+  const { data, isLoading, isFetching } = useDashboardStats(userId, period);
+
+  // keepPreviousData means switching periods doesn't trigger the full
+  // skeleton below (isLoading stays false) -- this spinner is the only
+  // feedback that a refetch is happening while the stale data is shown.
+  const header = (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+          {title}
+        </h2>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        {isFetching && !isLoading && (
+          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        )}
+        <PeriodSelector value={period} onValueChange={setPeriod} />
+      </div>
+    </div>
+  );
 
   if (isLoading || !data) {
     return (
       <div className="flex flex-col gap-6">
-        <DashboardPeriodPerformance />
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-          <div className="lg:col-span-3">
-            <DashboardStatCardsSkeleton />
-          </div>
+        {header}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <TaskCompletionCardSkeleton />
+          <KraCompletionCardSkeleton />
           <DashboardScoreCardSkeleton />
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -47,8 +85,8 @@ export function DashboardOverview({ currentUserId }: { currentUserId: string }) 
           <DashboardRecentKrasSkeleton />
         </div>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <DashboardWeeklyCompletionChartSkeleton />
-          <DashboardLeaderboardSkeleton />
+          <TaskCompletionTrendChartSkeleton />
+          <AdminOverallLeaderboardCardSkeleton />
         </div>
       </div>
     );
@@ -56,23 +94,26 @@ export function DashboardOverview({ currentUserId }: { currentUserId: string }) 
 
   return (
     <div className="flex flex-col gap-6">
-      <DashboardPeriodPerformance />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-        <div className="lg:col-span-3">
-          <DashboardStatCards stats={data.stats} />
+      {header}
+      <div
+        className={cn(
+          "flex flex-col gap-6 transition-opacity",
+          isFetching && "opacity-60",
+        )}
+      >
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <TaskCompletionCard data={data.taskCompletion} />
+          <KraCompletionCard data={data.kraCompletion} />
+          <DashboardScoreCard performance={data.overallScore} />
         </div>
-        <DashboardScoreCard performance={data.performanceScore} />
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <DashboardRecentTasks tasks={data.recentTasks} />
-        <DashboardRecentKras kras={data.recentKras} />
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <DashboardWeeklyCompletionChart points={data.weeklyCompletion} />
-        <DashboardLeaderboard
-          entries={data.leaderboard}
-          currentUserId={currentUserId}
-        />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <DashboardRecentTasks tasks={data.recentTasks} />
+          <DashboardRecentKras kras={data.recentKras} />
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <TaskCompletionTrendChart trend={data.taskCompletionTrend} />
+          <AdminOverallLeaderboardCard entries={data.overallLeaderboard} />
+        </div>
       </div>
     </div>
   );

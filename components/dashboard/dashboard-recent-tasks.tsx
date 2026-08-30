@@ -1,8 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { ListTodo } from "lucide-react";
 
 import type { DashboardRecentTask } from "@/features/dashboard/types";
 import { LIST_CARD_HEIGHT } from "@/components/dashboard/constants";
 import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { TaskDetailsSheet } from "@/components/task/task-details-sheet";
 import {
   getEffectiveTaskStatus,
   TaskStatusBadge,
@@ -33,6 +37,8 @@ export function DashboardRecentTasks({
 }: {
   tasks: DashboardRecentTask[];
 }) {
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
   return (
     <Card>
       <CardHeader>
@@ -51,7 +57,11 @@ export function DashboardRecentTasks({
           <ScrollArea className={LIST_CARD_HEIGHT}>
             <ul className="flex flex-col gap-4 pr-3">
               {tasks.map((task) => (
-                <li key={task.id} className="flex items-center gap-3">
+                <li
+                  key={task.id}
+                  onClick={() => setSelectedTaskId(task.id)}
+                  className="-mx-2 flex cursor-pointer items-center gap-3 rounded-md px-2 py-1 transition-colors hover:bg-muted/40"
+                >
                   <Avatar size="sm">
                     <AvatarFallback
                       className={`text-white ${getAvatarColor(task.assignedBy.id)}`}
@@ -78,6 +88,12 @@ export function DashboardRecentTasks({
           </ScrollArea>
         )}
       </CardContent>
+      <TaskDetailsSheet
+        taskId={selectedTaskId}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTaskId(null);
+        }}
+      />
     </Card>
   );
 }
