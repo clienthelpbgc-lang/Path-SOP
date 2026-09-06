@@ -8,7 +8,7 @@ import type { DashboardPeriod } from "../period-presets.util";
 import type { DashboardRecentTask } from "../../types";
 
 const RECENT_ASSIGNED_LIMIT = 4;
-const PARTY_COLUMNS = { id: true, name: true, email: true } as const;
+const PARTY_COLUMNS = { id: true, name: true, email: true, phone: true } as const;
 
 // Last N tasks assigned to a user within the given period, most recently
 // created first -- same shape/ordering as the recentTasks block in

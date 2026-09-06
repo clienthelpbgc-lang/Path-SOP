@@ -84,6 +84,7 @@ async function sendReminder(reminder: DueReminder): Promise<void> {
 
   await sendWhatsAppTemplateMessage({
     to: reminder.assigneePhone,
+    templateName: process.env.WHATSAPP_TEMPLATE_NAME || "task_reminder",
     bodyParams: [
       reminder.assigneeName,
       reminder.taskTitle,

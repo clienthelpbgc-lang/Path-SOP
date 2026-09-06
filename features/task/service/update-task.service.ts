@@ -13,10 +13,12 @@ import {
   assertTaskParticipant,
   getTaskScope,
 } from "@/features/task/service/task-scope";
+import { notifyTaskReassignment } from "@/features/task/service/notify-task-assignment.service";
 import { assertUserInCompany } from "@/features/task/service/user-scope";
 import { tasks } from "@/features/task/schema";
 import type { NewTask, Task, UpdateTaskInput } from "@/features/task/types";
 import { taskIdSchema, updateTaskSchema } from "@/features/task/validators";
+import { users } from "@/features/user/schema";
 import {
   ConflictError,
   ForbiddenError,
@@ -170,8 +172,10 @@ export async function updateTask(
   const scheduleChanged =
     updateValues.startAt !== undefined || updateValues.dueAt !== undefined;
 
+  let updatedTask: Task;
+
   try {
-    return await db.transaction(async (tx) => {
+    updatedTask = await db.transaction(async (tx) => {
       const [updated] = await tx
         .update(tasks)
         .set(updateValues)
@@ -204,4 +208,23 @@ export async function updateTask(
 
     translateDatabaseError(error);
   }
+
+  if (updateValues.assignedTo) {
+    const [assigneeRow] = await db
+      .select({ name: users.name, email: users.email, phone: users.phone })
+      .from(users)
+      .where(eq(users.id, updateValues.assignedTo))
+      .limit(1);
+    const [actorRow] = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (assigneeRow && actorRow) {
+      await notifyTaskReassignment(updatedTask, assigneeRow, actorRow.name);
+    }
+  }
+
+  return updatedTask;
 }

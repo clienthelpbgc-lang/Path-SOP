@@ -7,7 +7,7 @@ import type { TaskWithRelations } from "@/features/task/types";
 import { taskIdSchema } from "@/features/task/validators";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 
-const PARTY_COLUMNS = { id: true, name: true, email: true } as const;
+const PARTY_COLUMNS = { id: true, name: true, email: true, phone: true } as const;
 
 export async function getTaskById(
   companyId: string,

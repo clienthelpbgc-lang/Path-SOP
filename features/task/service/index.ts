@@ -15,6 +15,7 @@ export * from "./generate-recurring-tasks.service";
 export * from "./get-all-task-templates.service";
 export * from "./get-all-tasks.service";
 export * from "./get-task-by-id.service";
+export * from "./notify-task-assignment.service";
 export * from "./update-task-checklist-item.service";
 export * from "./update-task-reminder.service";
 export * from "./update-task-template.service";

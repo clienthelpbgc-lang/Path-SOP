@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { computeNextRunAt } from "@/features/task/service/recurrence";
 import { computeReminderScheduledAt } from "@/features/task/service/reminder-schedule";
 import { getTaskById } from "@/features/task/service/get-task-by-id.service";
+import { notifyTaskAssignment } from "@/features/task/service/notify-task-assignment.service";
 import { assertUserInCompany, assertUsersInCompany } from "@/features/task/service/user-scope";
 import {
   taskAttachments,
@@ -131,5 +132,9 @@ export async function createTaskWithRelations(
     translateDatabaseError(error);
   }
 
-  return getTaskById(companyId, createdTaskId);
+  const task = await getTaskById(companyId, createdTaskId);
+
+  await notifyTaskAssignment(task);
+
+  return task;
 }

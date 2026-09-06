@@ -19,28 +19,37 @@ function normalizePhoneNumber(phone: string): string {
 
 export type WhatsAppTemplateMessageInput = {
   to: string;
+  // Name of the pre-approved template to send (different notification types
+  // use different templates -- see e.g. WHATSAPP_TEMPLATE_NAME for reminders
+  // and WHATSAPP_TASK_ASSIGNED_TEMPLATE_NAME for assignment alerts).
+  templateName: string;
+  languageCode?: string;
   // Body parameters, in the exact order the approved template's {{1}},
   // {{2}}, ... placeholders expect.
   bodyParams: string[];
 };
 
-// Reminders are business-initiated (the recipient hasn't messaged us in the
-// last 24h), so the Cloud API requires a pre-approved message template --
-// free-form text is rejected outside that window. See WHATSAPP_TEMPLATE_NAME
-// below and the setup notes for the exact template to submit for approval.
+// All business-initiated messages (the recipient hasn't messaged us in the
+// last 24h) require a pre-approved message template -- free-form text is
+// rejected outside that window. See each caller for the specific template
+// env var it reads and the setup notes for the exact template to submit for
+// approval.
 export async function sendWhatsAppTemplateMessage(
   input: WhatsAppTemplateMessageInput,
 ): Promise<void> {
   const accessToken = process.env.WHATSAPP_ACCESS_TOKEN;
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const templateName = process.env.WHATSAPP_TEMPLATE_NAME;
   const languageCode =
-    process.env.WHATSAPP_TEMPLATE_LANG || DEFAULT_TEMPLATE_LANGUAGE;
+    input.languageCode || process.env.WHATSAPP_TEMPLATE_LANG || DEFAULT_TEMPLATE_LANGUAGE;
 
-  if (!accessToken || !phoneNumberId || !templateName) {
+  if (!accessToken || !phoneNumberId) {
     throw new Error(
-      "WhatsApp is not configured (missing WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, or WHATSAPP_TEMPLATE_NAME).",
+      "WhatsApp is not configured (missing WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID).",
     );
+  }
+
+  if (!input.templateName) {
+    throw new Error("WhatsApp template name is required.");
   }
 
   const to = normalizePhoneNumber(input.to);
@@ -58,7 +67,7 @@ export async function sendWhatsAppTemplateMessage(
         to,
         type: "template",
         template: {
-          name: templateName,
+          name: input.templateName,
           language: { code: languageCode },
           components: [
             {
