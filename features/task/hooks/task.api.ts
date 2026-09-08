@@ -65,6 +65,12 @@ export function deleteTaskRequest(id: string) {
   });
 }
 
+export function stopRepeatingTaskRequest(id: string) {
+  return apiFetch<Task>(`${BASE_URL}/${id}/stop-repeating`, {
+    method: "POST",
+  });
+}
+
 export function createTaskChecklistItemRequest(
   taskId: string,
   input: Omit<CreateTaskChecklistItemInput, "taskId">,

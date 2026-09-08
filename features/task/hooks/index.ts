@@ -5,6 +5,7 @@ export * from "./use-task";
 export * from "./use-create-task";
 export * from "./use-update-task";
 export * from "./use-delete-task";
+export * from "./use-stop-repeating-task";
 export * from "./use-create-task-checklist-item";
 export * from "./use-update-task-checklist-item";
 export * from "./use-delete-task-checklist-item";

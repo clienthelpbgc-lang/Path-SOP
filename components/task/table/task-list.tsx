@@ -27,9 +27,16 @@ type TaskListProps = {
   // matching the regular Tasks page. "all" is for the admin-only overview:
   // every task in the company, filterable down to one assignee at a time.
   scope?: "mine" | "all";
+  // Admin-only "Repeating Tasks" page: shows only tasks currently repeating,
+  // with a "Stop repeating" button per row.
+  onlyRepeating?: boolean;
 };
 
-export function TaskList({ currentUserId, scope = "mine" }: TaskListProps) {
+export function TaskList({
+  currentUserId,
+  scope = "mine",
+  onlyRepeating = false,
+}: TaskListProps) {
   const [filters, setFilters] = useState<TaskFilters>(EMPTY_TASK_FILTERS);
   const [page, setPage] = useState(1);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -59,6 +66,7 @@ export function TaskList({ currentUserId, scope = "mine" }: TaskListProps) {
           : undefined,
     dueDateFrom: filters.dateRange.from,
     dueDateTo: filters.dateRange.to,
+    isRepeating: onlyRepeating ? "true" : undefined,
   });
   const tasks: Task[] = data?.data ?? [];
 
@@ -73,6 +81,7 @@ export function TaskList({ currentUserId, scope = "mine" }: TaskListProps) {
     userNames,
     showAssigneeColumn,
     currentUserId,
+    showStopRepeating: onlyRepeating,
   });
 
   return (
@@ -90,9 +99,11 @@ export function TaskList({ currentUserId, scope = "mine" }: TaskListProps) {
           description={
             hasActiveTaskFilters(filters)
               ? "Try a different search term or filter."
-              : scope === "all"
-                ? "Tasks created across your company will show up here."
-                : "Tasks assigned to you will show up here."
+              : onlyRepeating
+                ? "Repeating tasks across your company will show up here."
+                : scope === "all"
+                  ? "Tasks created across your company will show up here."
+                  : "Tasks assigned to you will show up here."
           }
         />
       ) : (

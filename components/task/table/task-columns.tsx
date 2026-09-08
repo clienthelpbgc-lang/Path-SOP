@@ -1,15 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { Repeat } from "lucide-react";
 import { createColumnHelper, type ColumnDef } from "@tanstack/react-table";
 
 import type { Task } from "@/features/task/types";
+import { StopRepeatingTaskDialog } from "@/components/task/stop-repeating-task-dialog";
 import { TaskRowActions } from "@/components/task/task-row-actions";
 import {
   TaskStatusBadge,
   getEffectiveTaskStatus,
 } from "@/components/task/task-status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 function initials(name: string) {
   return name
@@ -32,6 +35,34 @@ function formatDateTime(value: string | Date) {
   });
 }
 
+function StopRepeatingCell({ task }: { task: Task }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  if (!task.isRepeating) {
+    return <span className="text-muted-foreground">—</span>;
+  }
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={(event) => {
+          event.stopPropagation();
+          setDialogOpen(true);
+        }}
+      >
+        Stop repeating
+      </Button>
+      <StopRepeatingTaskDialog
+        task={dialogOpen ? task : null}
+        onOpenChange={setDialogOpen}
+      />
+    </>
+  );
+}
+
 const columnHelper = createColumnHelper<Task>();
 
 type GetTaskColumnsOptions = {
@@ -40,12 +71,17 @@ type GetTaskColumnsOptions = {
   // current user -- shown only on the admin's company-wide view.
   showAssigneeColumn: boolean;
   currentUserId: string;
+  // Admin-only "Repeating Tasks" view: adds a dedicated button to stop a
+  // series regardless of the underlying task's status, bypassing the
+  // pending-only edit lock in TaskRowActions.
+  showStopRepeating?: boolean;
 };
 
 export function getTaskColumns({
   userNames,
   showAssigneeColumn,
   currentUserId,
+  showStopRepeating = false,
 }: GetTaskColumnsOptions): ColumnDef<Task, unknown>[] {
   const columns = [
     columnHelper.accessor("title", {
@@ -132,6 +168,12 @@ export function getTaskColumns({
         <TaskStatusBadge status={getEffectiveTaskStatus(row.original)} />
       ),
     }),
+    showStopRepeating &&
+      columnHelper.display({
+        id: "stopRepeating",
+        header: "Repeat",
+        cell: ({ row }) => <StopRepeatingCell task={row.original} />,
+      }),
     columnHelper.display({
       id: "actions",
       header: "",
