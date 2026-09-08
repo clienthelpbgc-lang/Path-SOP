@@ -6,6 +6,7 @@ import {
   gte,
   ilike,
   inArray,
+  isNotNull,
   lt,
   lte,
   not,
@@ -56,7 +57,17 @@ export async function getAllTasks(
     eq(tasks.companyId, companyId),
     assignedTo ? eq(tasks.assignedTo, assignedTo) : undefined,
     status ? eq(tasks.status, status) : undefined,
-    isRepeating !== undefined ? eq(tasks.isRepeating, isRepeating) : undefined,
+    // A repeating series accumulates one row per past occurrence, and every
+    // one of them still carries isRepeating=true even though only the most
+    // recent matters -- older occurrences are spent history. `nextRunAt` is
+    // only ever set on that one live occurrence (spawning clears it on the
+    // row it came from, see generate-recurring-tasks.service.ts), so it's
+    // the signal that actually means "this series is still going."
+    isRepeating === true
+      ? isNotNull(tasks.nextRunAt)
+      : isRepeating === false
+        ? eq(tasks.isRepeating, false)
+        : undefined,
     overdue === true ? isOverdue : undefined,
     overdue === false ? not(isOverdue) : undefined,
     dueDateFrom ? gte(tasks.dueAt, dueDateFrom) : undefined,

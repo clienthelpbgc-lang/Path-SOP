@@ -75,6 +75,10 @@ type GetTaskColumnsOptions = {
   // series regardless of the underlying task's status, bypassing the
   // pending-only edit lock in TaskRowActions.
   showStopRepeating?: boolean;
+  // Hidden on the "Repeating Tasks" view, where every row is the same
+  // still-open live occurrence -- schedule/status columns say nothing
+  // useful there and just crowd out the stop-repeating action.
+  showScheduleColumns?: boolean;
 };
 
 export function getTaskColumns({
@@ -82,6 +86,7 @@ export function getTaskColumns({
   showAssigneeColumn,
   currentUserId,
   showStopRepeating = false,
+  showScheduleColumns = true,
 }: GetTaskColumnsOptions): ColumnDef<Task, unknown>[] {
   const columns = [
     columnHelper.accessor("title", {
@@ -143,35 +148,38 @@ export function getTaskColumns({
         </span>
       ),
     }),
-    columnHelper.accessor("startAt", {
-      id: "startAt",
-      header: "Start date",
-      cell: ({ getValue }) => (
-        <span className="text-foreground">
-          {formatDateTime(getValue() as unknown as string)}
-        </span>
-      ),
-    }),
-    columnHelper.accessor("dueAt", {
-      id: "dueAt",
-      header: "Due date",
-      cell: ({ getValue }) => (
-        <span className="text-foreground">
-          {formatDateTime(getValue() as unknown as string)}
-        </span>
-      ),
-    }),
-    columnHelper.display({
-      id: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <TaskStatusBadge status={getEffectiveTaskStatus(row.original)} />
-      ),
-    }),
+    showScheduleColumns &&
+      columnHelper.accessor("startAt", {
+        id: "startAt",
+        header: "Start date",
+        cell: ({ getValue }) => (
+          <span className="text-foreground">
+            {formatDateTime(getValue() as unknown as string)}
+          </span>
+        ),
+      }),
+    showScheduleColumns &&
+      columnHelper.accessor("dueAt", {
+        id: "dueAt",
+        header: "Due date",
+        cell: ({ getValue }) => (
+          <span className="text-foreground">
+            {formatDateTime(getValue() as unknown as string)}
+          </span>
+        ),
+      }),
+    showScheduleColumns &&
+      columnHelper.display({
+        id: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <TaskStatusBadge status={getEffectiveTaskStatus(row.original)} />
+        ),
+      }),
     showStopRepeating &&
       columnHelper.display({
         id: "stopRepeating",
-        header: "Repeat",
+        header: "",
         cell: ({ row }) => <StopRepeatingCell task={row.original} />,
       }),
     columnHelper.display({

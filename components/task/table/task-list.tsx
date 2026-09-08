@@ -82,6 +82,7 @@ export function TaskList({
     showAssigneeColumn,
     currentUserId,
     showStopRepeating: onlyRepeating,
+    showScheduleColumns: !onlyRepeating,
   });
 
   return (
