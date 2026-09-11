@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Building2, ChevronsUpDown, LogOut, UserCircle } from "lucide-react";
@@ -139,6 +140,25 @@ export function SidebarContent({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
+
+      <div className="flex flex-col items-center gap-1 border-t border-sidebar-border py-3">
+        <div className="flex items-center gap-1.5 text-xs text-sidebar-foreground/50">
+          <span>Powered by</span>
+          <Image
+            src="/bgc-logo.png"
+            alt="Business Growth Consultancy"
+            width={1721}
+            height={366}
+            className="h-4 w-auto bg-white"
+          />
+        </div>
+        <a
+          href="tel:9437049007"
+          className="text-xs text-sidebar-foreground/50 transition-colors hover:text-sidebar-foreground"
+        >
+          9437049007
+        </a>
       </div>
     </div>
   );
