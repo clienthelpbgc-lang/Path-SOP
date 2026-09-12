@@ -57,14 +57,6 @@ const sourceTaskIdSchema = z.uuid({
   error: "Please provide a valid source task id.",
 });
 
-const defaultAssigneeSchema = z.uuid({
-  error: "Please provide a valid default assignee id.",
-});
-
-const defaultWatchersSchema = z.array(
-  z.uuid({ error: "Please provide valid watcher ids." }),
-);
-
 const isRepeatingSchema = z.boolean({
   error: "isRepeating must be true or false.",
 });
@@ -86,8 +78,6 @@ const taskTemplateBaseSchema = z.object({
   weightage: weightageSchema.default(0),
   checklist: checklistSchema.default([]),
   reminders: remindersSchema.default([]),
-  defaultAssignee: defaultAssigneeSchema.optional(),
-  defaultWatchers: defaultWatchersSchema.default([]),
   isRepeating: isRepeatingSchema.default(false),
   repeatUnit: repeatUnitSchema.optional(),
   repeatInterval: repeatIntervalSchema.optional(),
@@ -108,8 +98,6 @@ export const updateTaskTemplateSchema = z
     weightage: weightageSchema.optional(),
     checklist: checklistSchema.optional(),
     reminders: remindersSchema.optional(),
-    defaultAssignee: defaultAssigneeSchema.optional(),
-    defaultWatchers: defaultWatchersSchema.optional(),
     isRepeating: isRepeatingSchema.optional(),
     repeatUnit: repeatUnitSchema.optional(),
     repeatInterval: repeatIntervalSchema.optional(),

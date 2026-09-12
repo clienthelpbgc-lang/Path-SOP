@@ -51,3 +51,9 @@ export function deleteTaskTemplateRequest(id: string) {
     method: "DELETE",
   });
 }
+
+export function hardDeleteTaskTemplateRequest(id: string) {
+  return apiFetch<TaskTemplate>(`${BASE_URL}/${id}/permanent`, {
+    method: "DELETE",
+  });
+}

@@ -22,9 +22,9 @@ type CreateTaskTemplateDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-// Fetches the task's full relations (checklist, reminders, watchers) so the
-// template is a genuine copy, not just the title/weightage visible in the
-// row -- the list query backing the table doesn't include those relations.
+// Fetches the task's full relations (checklist, reminders) so the template
+// is a genuine copy, not just the title/weightage visible in the row -- the
+// list query backing the table doesn't include those relations.
 export function CreateTaskTemplateDialog({
   task,
   onOpenChange,
@@ -68,8 +68,6 @@ export function CreateTaskTemplateDialog({
           anchor: reminder.anchor,
           offsetMinutes: reminder.offsetMinutes,
         })),
-        defaultAssignee: fullTask.assignedTo,
-        defaultWatchers: fullTask.watchers.map((watcher) => watcher.userId),
         isRepeating: fullTask.isRepeating,
         repeatUnit: fullTask.isRepeating
           ? (fullTask.repeatUnit ?? undefined)

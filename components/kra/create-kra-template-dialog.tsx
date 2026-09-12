@@ -61,7 +61,6 @@ export function CreateKraTemplateDialog({
         weightage: kra.weightage,
         remarks: kra.remarks ?? undefined,
         repeat: kra.repeat,
-        defaultAssignee: kra.assignedTo,
         isActive: true,
       },
       { onSuccess: () => handleOpenChange(false) },

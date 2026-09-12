@@ -44,10 +44,6 @@ const sourceKraIdSchema = z.uuid({
   error: "Please provide a valid source KRA id.",
 });
 
-const defaultAssigneeSchema = z.uuid({
-  error: "Please provide a valid default assignee id.",
-});
-
 const isActiveSchema = z.boolean({
   error: "isActive must be true or false.",
 });
@@ -68,7 +64,6 @@ const kraTemplateBaseSchema = z.object({
   repeat: z
     .boolean({ error: "repeat must be true or false." })
     .default(false),
-  defaultAssignee: defaultAssigneeSchema.optional(),
   isActive: isActiveSchema.default(true),
 });
 
@@ -84,7 +79,6 @@ export const updateKraTemplateSchema = z
     weightage: weightageSchema.optional(),
     remarks: remarksSchema.optional(),
     repeat: z.boolean().optional(),
-    defaultAssignee: defaultAssigneeSchema.optional(),
     isActive: isActiveSchema.optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {

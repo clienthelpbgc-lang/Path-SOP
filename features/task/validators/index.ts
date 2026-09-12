@@ -4,6 +4,8 @@ export * from "./edit-task-template-form.validator";
 export * from "./task-attachment.validator";
 export * from "./task-checklist-item.validator";
 export * from "./task-reminder.validator";
+export * from "./task-template-preset-form.validator";
+export * from "./task-template-preset.validator";
 export * from "./task-template.validator";
 export * from "./task-watcher.validator";
 export * from "./task.validator";

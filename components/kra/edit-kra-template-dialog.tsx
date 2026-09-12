@@ -9,7 +9,6 @@ import { useUpdateKraTemplate } from "@/features/kra/hooks";
 import type { KraTemplate } from "@/features/kra/types";
 import { createKraTemplateSchema } from "@/features/kra/validators";
 import { KRA_TYPE_LABELS, WEIGHTAGE_OPTIONS } from "@/components/kra/kra-form-constants";
-import { AssigneeCombobox } from "@/components/team/assignee-combobox";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -49,7 +48,6 @@ function defaultValues(template: KraTemplate): FormInput {
     weightage: template.weightage,
     remarks: template.remarks ?? "",
     repeat: template.repeat,
-    defaultAssignee: template.defaultAssignee ?? "",
     isActive: template.isActive,
   };
 }
@@ -114,10 +112,6 @@ function EditKraTemplateForm({
           weightage: values.weightage,
           remarks: values.remarks ? values.remarks : undefined,
           repeat: values.repeat,
-          // `defaultAssignee` can't be explicitly cleared through this PATCH
-          // (an omitted key means "leave as-is", matching every other
-          // optional field in the update APIs) -- only reassigned.
-          defaultAssignee: values.defaultAssignee || undefined,
           isActive: values.isActive,
         },
       },
@@ -242,26 +236,6 @@ function EditKraTemplateForm({
               </p>
             )}
           </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="kra-template-defaultAssignee">
-            Default assignee{" "}
-            <span className="font-normal text-muted-foreground">
-              (optional)
-            </span>
-          </Label>
-          <Controller
-            control={control}
-            name="defaultAssignee"
-            render={({ field }) => (
-              <AssigneeCombobox
-                id="kra-template-defaultAssignee"
-                value={field.value ?? ""}
-                onValueChange={field.onChange}
-              />
-            )}
-          />
         </div>
 
         <div className="flex flex-col gap-1.5">

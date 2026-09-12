@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { kraTemplates, kras } from "@/features/kra/schema";
-import { assertUserInCompany } from "@/features/kra/service/user-scope";
 import type { CreateKraTemplateInput, KraTemplate } from "@/features/kra/types";
 import { createKraTemplateSchema } from "@/features/kra/validators";
 import type { UserRole } from "@/features/user/constants/role.constant";
@@ -44,14 +43,6 @@ export async function createKraTemplate(
     if (!sourceKra) {
       throw new BadRequestError("Source KRA not found in your company.");
     }
-  }
-
-  if (result.data.defaultAssignee) {
-    await assertUserInCompany(
-      companyId,
-      result.data.defaultAssignee,
-      "Default assignee not found in your company.",
-    );
   }
 
   try {

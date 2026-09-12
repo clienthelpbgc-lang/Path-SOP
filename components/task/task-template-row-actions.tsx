@@ -15,8 +15,9 @@ import {
 import { CreateTaskDialog } from "@/components/task/create-task-dialog";
 import { DeleteTaskTemplateDialog } from "@/components/task/delete-task-template-dialog";
 import { EditTaskTemplateDialog } from "@/components/task/edit-task-template-dialog";
+import { HardDeleteTaskTemplateDialog } from "@/components/task/hard-delete-task-template-dialog";
 
-type DialogKind = "create-task" | "edit" | "delete" | null;
+type DialogKind = "create-task" | "edit" | "delete" | "hard-delete" | null;
 
 type TaskTemplateRowActionsProps = {
   template: TaskTemplate;
@@ -48,17 +49,22 @@ export function TaskTemplateRowActions({
             Edit
           </DropdownMenuItem>
           {template.isActive && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setOpenDialog("delete")}
-              >
-                <Trash2 />
-                Delete
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setOpenDialog("delete")}
+            >
+              <Trash2 />
+              Delete
+            </DropdownMenuItem>
           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setOpenDialog("hard-delete")}
+          >
+            <Trash2 />
+            Delete permanently
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -75,6 +81,10 @@ export function TaskTemplateRowActions({
       />
       <DeleteTaskTemplateDialog
         template={openDialog === "delete" ? template : null}
+        onOpenChange={(open) => !open && setOpenDialog(null)}
+      />
+      <HardDeleteTaskTemplateDialog
+        template={openDialog === "hard-delete" ? template : null}
         onOpenChange={(open) => !open && setOpenDialog(null)}
       />
     </div>

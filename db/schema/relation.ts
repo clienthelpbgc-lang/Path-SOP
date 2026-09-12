@@ -1,11 +1,13 @@
 import { relations } from "drizzle-orm";
 
 import { companies } from "@/features/company/schema";
-import { kraTemplates, kras } from "@/features/kra/schema";
+import { kraTemplatePresets, kraTemplates, kras } from "@/features/kra/schema";
+import { platformAdmins } from "@/features/platform-admin/schema";
 import {
   taskAttachments,
   taskChecklistItems,
   taskReminders,
+  taskTemplatePresets,
   taskTemplates,
   taskWatchers,
   tasks,
@@ -118,6 +120,26 @@ export const taskTemplatesRelations = relations(taskTemplates, ({ one }) => ({
     relationName: "templateSourceTask",
   }),
 }));
+
+export const taskTemplatePresetsRelations = relations(
+  taskTemplatePresets,
+  ({ one }) => ({
+    creator: one(platformAdmins, {
+      fields: [taskTemplatePresets.createdBy],
+      references: [platformAdmins.id],
+    }),
+  }),
+);
+
+export const kraTemplatePresetsRelations = relations(
+  kraTemplatePresets,
+  ({ one }) => ({
+    creator: one(platformAdmins, {
+      fields: [kraTemplatePresets.createdBy],
+      references: [platformAdmins.id],
+    }),
+  }),
+);
 
 export const taskChecklistItemsRelations = relations(
   taskChecklistItems,

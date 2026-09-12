@@ -15,7 +15,7 @@ import type { z } from "zod";
 import { useCreateTask } from "@/features/task/hooks";
 import { deleteUploadedTaskAttachmentRequest } from "@/features/task/hooks/task.api";
 import type { RepeatUnit } from "@/features/task/constants/repeat-unit.constant";
-import type { TaskTemplate } from "@/features/task/types";
+import type { TaskTemplateLike } from "@/features/task/types";
 import { createTaskFormSchema } from "@/features/task/validators";
 import { AssigneeCombobox } from "@/components/team/assignee-combobox";
 import {
@@ -60,11 +60,11 @@ function endOfToday(): Date {
   return date;
 }
 
-function defaultValues(template?: TaskTemplate | null): FormInput {
+function defaultValues(template?: TaskTemplateLike | null): FormInput {
   return {
     title: template?.title ?? "",
     description: template?.description ?? "",
-    assignedTo: template?.defaultAssignee ?? "",
+    assignedTo: "",
     // Templates allow a weightage of 0, tasks don't -- clamp so a prefilled
     // form doesn't fail validation before the user has touched anything.
     weightage: Math.max(1, template?.weightage ?? 1),
@@ -82,15 +82,18 @@ function defaultValues(template?: TaskTemplate | null): FormInput {
         .slice()
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((item) => ({ text: item.text })) ?? [],
-    watcherIds: template?.defaultWatchers ?? [],
+    watcherIds: [],
   };
 }
 
 type CreateTaskDialogProps = {
   // When provided, the dialog is externally controlled (triggered from a
   // template's "Create task" action) and its form is prefilled from the
-  // template instead of rendering its own "New Task" button.
-  template?: TaskTemplate | null;
+  // template instead of rendering its own "New Task" button. Accepts
+  // anything structurally shaped like a template -- see TaskTemplateLike --
+  // so a preset (which has no `id` worth trusting as a real templateId FK)
+  // can be passed in the same way as a real per-company TaskTemplate.
+  template?: TaskTemplateLike | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };

@@ -85,10 +85,7 @@ export async function deleteUser(
     .where(
       and(
         eq(kraTemplates.companyId, companyId),
-        or(
-          eq(kraTemplates.defaultAssignee, idResult.data),
-          eq(kraTemplates.createdBy, idResult.data),
-        ),
+        eq(kraTemplates.createdBy, idResult.data),
       ),
     )
     .limit(1);
@@ -105,10 +102,7 @@ export async function deleteUser(
     .where(
       and(
         eq(taskTemplates.companyId, companyId),
-        or(
-          eq(taskTemplates.defaultAssignee, idResult.data),
-          eq(taskTemplates.createdBy, idResult.data),
-        ),
+        eq(taskTemplates.createdBy, idResult.data),
       ),
     )
     .limit(1);

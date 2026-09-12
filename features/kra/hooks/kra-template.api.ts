@@ -51,3 +51,9 @@ export function deleteKraTemplateRequest(id: string) {
     method: "DELETE",
   });
 }
+
+export function hardDeleteKraTemplateRequest(id: string) {
+  return apiFetch<KraTemplate>(`${BASE_URL}/${id}/permanent`, {
+    method: "DELETE",
+  });
+}

@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { taskTemplates } from "@/features/task/schema";
-import { assertUserInCompany, assertUsersInCompany } from "@/features/task/service/user-scope";
 import type { TaskTemplate, UpdateTaskTemplateInput } from "@/features/task/types";
 import {
   taskTemplateIdSchema,
@@ -32,22 +31,6 @@ export async function updateTaskTemplate(
     throw new ValidationError(
       "Invalid template data.",
       z.flattenError(result.error).fieldErrors,
-    );
-  }
-
-  if (result.data.defaultAssignee) {
-    await assertUserInCompany(
-      companyId,
-      result.data.defaultAssignee,
-      "Default assignee not found in your company.",
-    );
-  }
-
-  if (result.data.defaultWatchers) {
-    await assertUsersInCompany(
-      companyId,
-      result.data.defaultWatchers,
-      "One or more default watchers were not found in your company.",
     );
   }
 

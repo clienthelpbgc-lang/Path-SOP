@@ -3,15 +3,13 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
-import { Loader2, Plus, Users, X } from "lucide-react";
+import { Loader2, Plus, X } from "lucide-react";
 import type { z } from "zod";
 
 import { useUpdateTaskTemplate } from "@/features/task/hooks";
 import type { RepeatUnit } from "@/features/task/constants/repeat-unit.constant";
 import type { TaskTemplate } from "@/features/task/types";
 import { editTaskTemplateFormSchema } from "@/features/task/validators";
-import { AssigneeCombobox } from "@/components/team/assignee-combobox";
-import { WatchersCombobox } from "@/components/task/watchers-combobox";
 import { WEIGHTAGE_OPTIONS } from "@/components/task/task-form-constants";
 import {
   ReminderFieldset,
@@ -48,7 +46,6 @@ function defaultValues(template: TaskTemplate): FormInput {
     title: template.title,
     description: template.description ?? "",
     weightage: template.weightage,
-    defaultAssignee: template.defaultAssignee ?? "",
     isActive: template.isActive,
     isRepeating: template.isRepeating,
     repeatUnit: template.repeatUnit ?? undefined,
@@ -58,7 +55,6 @@ function defaultValues(template: TaskTemplate): FormInput {
       .slice()
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((item) => ({ text: item.text })),
-    watcherIds: template.defaultWatchers,
   };
 }
 
@@ -176,11 +172,6 @@ function EditTaskTemplateForm({
           weightage: values.weightage,
           checklist,
           reminders,
-          // `defaultAssignee` can't be explicitly cleared through this PATCH
-          // (an omitted key means "leave as-is", matching every other
-          // optional field in the update APIs) -- only reassigned.
-          defaultAssignee: values.defaultAssignee || undefined,
-          defaultWatchers: values.watcherIds,
           isRepeating: values.isRepeating,
           repeatUnit: values.isRepeating ? values.repeatUnit : undefined,
           repeatInterval: values.isRepeating
@@ -299,87 +290,42 @@ function EditTaskTemplateForm({
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="template-defaultAssignee">
-              Default assignee{" "}
-              <span className="font-normal text-muted-foreground">
-                (optional)
-              </span>
-            </Label>
-            <Controller
-              control={control}
-              name="defaultAssignee"
-              render={({ field }) => (
-                <AssigneeCombobox
-                  id="template-defaultAssignee"
-                  value={field.value ?? ""}
-                  onValueChange={field.onChange}
-                />
-              )}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="template-weightage">Weightage</Label>
-            <Controller
-              control={control}
-              name="weightage"
-              render={({ field }) => (
-                <Select
-                  value={
-                    field.value !== undefined && field.value !== null
-                      ? String(field.value)
-                      : undefined
-                  }
-                  onValueChange={(value) => field.onChange(Number(value))}
-                >
-                  <SelectTrigger
-                    id="template-weightage"
-                    aria-invalid={!!errors.weightage}
-                    className="w-full"
-                  >
-                    <SelectValue placeholder="Select weightage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WEIGHTAGE_OPTIONS.map((value) => (
-                      <SelectItem key={value} value={String(value)}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.weightage && (
-              <p className="text-xs text-destructive">
-                {errors.weightage.message}
-              </p>
-            )}
-          </div>
-        </div>
-
         <div className="flex flex-col gap-1.5">
-          <Label
-            htmlFor="template-watcherIds"
-            className="flex items-center gap-1.5"
-          >
-            <Users className="size-3.5 text-muted-foreground" />
-            Default watchers{" "}
-            <span className="font-normal text-muted-foreground">
-              (optional)
-            </span>
-          </Label>
+          <Label htmlFor="template-weightage">Weightage</Label>
           <Controller
             control={control}
-            name="watcherIds"
+            name="weightage"
             render={({ field }) => (
-              <WatchersCombobox
-                value={field.value}
-                onValueChange={field.onChange}
-              />
+              <Select
+                value={
+                  field.value !== undefined && field.value !== null
+                    ? String(field.value)
+                    : undefined
+                }
+                onValueChange={(value) => field.onChange(Number(value))}
+              >
+                <SelectTrigger
+                  id="template-weightage"
+                  aria-invalid={!!errors.weightage}
+                  className="w-full"
+                >
+                  <SelectValue placeholder="Select weightage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {WEIGHTAGE_OPTIONS.map((value) => (
+                    <SelectItem key={value} value={String(value)}>
+                      {value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           />
+          {errors.weightage && (
+            <p className="text-xs text-destructive">
+              {errors.weightage.message}
+            </p>
+          )}
         </div>
 
         <TaskRepeatFieldset

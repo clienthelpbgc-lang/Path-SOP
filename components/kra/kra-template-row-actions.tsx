@@ -15,8 +15,9 @@ import {
 import { CreateKraDialog } from "@/components/kra/create-kra-dialog";
 import { DeleteKraTemplateDialog } from "@/components/kra/delete-kra-template-dialog";
 import { EditKraTemplateDialog } from "@/components/kra/edit-kra-template-dialog";
+import { HardDeleteKraTemplateDialog } from "@/components/kra/hard-delete-kra-template-dialog";
 
-type DialogKind = "assign-kra" | "edit" | "delete" | null;
+type DialogKind = "assign-kra" | "edit" | "delete" | "hard-delete" | null;
 
 type KraTemplateRowActionsProps = {
   template: KraTemplate;
@@ -48,17 +49,22 @@ export function KraTemplateRowActions({
             Edit
           </DropdownMenuItem>
           {template.isActive && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setOpenDialog("delete")}
-              >
-                <Trash2 />
-                Delete
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setOpenDialog("delete")}
+            >
+              <Trash2 />
+              Delete
+            </DropdownMenuItem>
           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setOpenDialog("hard-delete")}
+          >
+            <Trash2 />
+            Delete permanently
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -75,6 +81,10 @@ export function KraTemplateRowActions({
       />
       <DeleteKraTemplateDialog
         template={openDialog === "delete" ? template : null}
+        onOpenChange={(open) => !open && setOpenDialog(null)}
+      />
+      <HardDeleteKraTemplateDialog
+        template={openDialog === "hard-delete" ? template : null}
         onOpenChange={(open) => !open && setOpenDialog(null)}
       />
     </div>

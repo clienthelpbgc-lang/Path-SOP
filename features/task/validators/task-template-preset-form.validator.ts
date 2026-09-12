@@ -1,0 +1,46 @@
+import { z } from "zod";
+
+import { REPEAT_UNITS } from "@/features/task/constants/repeat-unit.constant";
+
+import { checkRepeatFields } from "./repeat-fields.validator";
+
+// Client-side shape for the platform-admin "Create/Edit preset" form. Used
+// for both create and edit -- a preset has no source object to copy from,
+// so (unlike a company's own templates) the full field set is always
+// entered directly.
+export const taskTemplatePresetFormSchema = z
+  .object({
+    name: z
+      .string({ error: "Preset name is required." })
+      .trim()
+      .min(2, "Preset name must be at least 2 characters long.")
+      .max(120, "Preset name must not exceed 120 characters."),
+    title: z
+      .string({ error: "Title is required." })
+      .trim()
+      .min(2, "Title must be at least 2 characters long.")
+      .max(200, "Title must not exceed 200 characters."),
+    description: z
+      .string()
+      .trim()
+      .max(2000, "Description must not exceed 2000 characters.")
+      .optional(),
+    weightage: z.coerce
+      .number({ error: "Weightage must be a number." })
+      .int("Weightage must be an integer.")
+      .min(0, "Weightage cannot be negative.")
+      .max(10, "Weightage must not exceed 10."),
+    isActive: z.boolean(),
+    isRepeating: z.boolean(),
+    repeatUnit: z
+      .enum(REPEAT_UNITS, { error: "Please provide a valid repeat unit." })
+      .optional(),
+    repeatInterval: z.coerce
+      .number({ error: "Repeat interval must be a number." })
+      .int("Repeat interval must be an integer.")
+      .min(1, "Repeat interval must be at least 1.")
+      .optional(),
+    repeatDaysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
+    checklistItems: z.array(z.object({ text: z.string() })),
+  })
+  .superRefine(checkRepeatFields("preset"));

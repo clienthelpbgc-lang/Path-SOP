@@ -34,7 +34,6 @@ export const kraTemplates = pgTable(
     weightage: integer("weightage").notNull().default(1),
     remarks: text("remarks"),
     repeat: boolean("repeat").notNull().default(false),
-    defaultAssignee: uuid("default_assignee").references(() => users.id),
     isActive: boolean("is_active").notNull().default(true),
     createdBy: uuid("created_by")
       .notNull()

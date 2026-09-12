@@ -54,8 +54,6 @@ export const taskTemplates = pgTable(
       .$type<TemplateReminder[]>()
       .notNull()
       .default([]),
-    defaultAssignee: uuid("default_assignee").references(() => users.id),
-    defaultWatchers: uuid("default_watchers").array().notNull().default([]),
     isRepeating: boolean("is_repeating").notNull().default(false),
     repeatUnit: repeatUnitEnum("repeat_unit"),
     repeatInterval: integer("repeat_interval"),

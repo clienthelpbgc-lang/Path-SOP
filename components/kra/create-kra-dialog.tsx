@@ -7,7 +7,7 @@ import { Loader2, Plus } from "lucide-react";
 import type { z } from "zod";
 
 import { useCreateKra } from "@/features/kra/hooks";
-import type { KraTemplate } from "@/features/kra/types";
+import type { KraTemplateLike } from "@/features/kra/types";
 import {
   checkPeriodEndAfterStart,
   kraBaseSchema,
@@ -52,13 +52,15 @@ type FormOutput = z.output<typeof createKraFormSchema>;
 // intentionally a partial, not a full `FormInput`. Period dates never come
 // from a template (they're KRA-instance specific), so they stay unset even
 // when prefilling.
-function defaultValues(template?: KraTemplate | null): DefaultValues<FormInput> {
+function defaultValues(
+  template?: KraTemplateLike | null,
+): DefaultValues<FormInput> {
   return {
     title: template?.title ?? "",
     description: template?.description ?? "",
     type: template?.type,
     repeat: template?.repeat ?? false,
-    assignedTo: template?.defaultAssignee ?? "",
+    assignedTo: "",
     weightage: template?.weightage ?? 1,
     remarks: template?.remarks ?? "",
   };
@@ -67,8 +69,11 @@ function defaultValues(template?: KraTemplate | null): DefaultValues<FormInput> 
 type CreateKraDialogProps = {
   // When provided, the dialog is externally controlled (triggered from a
   // template's "Assign KRA" action) and its form is prefilled from the
-  // template instead of rendering its own "Assign KRA" button.
-  template?: KraTemplate | null;
+  // template instead of rendering its own "Assign KRA" button. Accepts
+  // anything structurally shaped like a template -- see KraTemplateLike --
+  // so a preset (which has no `id` worth trusting as a real templateId FK)
+  // can be passed in the same way as a real per-company KraTemplate.
+  template?: KraTemplateLike | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };

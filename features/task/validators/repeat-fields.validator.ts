@@ -28,8 +28,8 @@ interface RepeatFields {
   repeatDaysOfWeek?: number[];
 }
 
-/** Shared by `tasks` and `task_templates`, whose repeat config columns are identical. */
-export function checkRepeatFields(noun: "task" | "template") {
+/** Shared by `tasks`, `task_templates` and `task_template_presets`, whose repeat config columns are identical. */
+export function checkRepeatFields(noun: "task" | "template" | "preset") {
   return (data: RepeatFields, ctx: z.RefinementCtx) => {
     if (data.isRepeating) {
       if (!data.repeatUnit) {

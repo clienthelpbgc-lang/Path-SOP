@@ -17,3 +17,8 @@ export * from "./task-template.type";
 export * from "./create-task-template.type";
 export * from "./update-task-template.type";
 export * from "./list-task-templates.type";
+export * from "./task-template-preset.type";
+export * from "./create-task-template-preset.type";
+export * from "./update-task-template-preset.type";
+export * from "./list-task-template-presets.type";
+export * from "./task-template-like.type";

@@ -29,7 +29,6 @@ export const editTaskTemplateFormSchema = z
       .int("Weightage must be an integer.")
       .min(0, "Weightage cannot be negative.")
       .max(10, "Weightage must not exceed 10."),
-    defaultAssignee: z.string().optional(),
     isActive: z.boolean(),
     isRepeating: z.boolean(),
     repeatUnit: z
@@ -42,6 +41,5 @@ export const editTaskTemplateFormSchema = z
       .optional(),
     repeatDaysOfWeek: z.array(z.number().int().min(0).max(6)).optional(),
     checklistItems: z.array(z.object({ text: z.string() })),
-    watcherIds: z.array(z.uuid()),
   })
   .superRefine(checkRepeatFields("template"));

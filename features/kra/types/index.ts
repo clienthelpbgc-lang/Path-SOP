@@ -7,3 +7,8 @@ export * from "./kra-template.type";
 export * from "./create-kra-template.type";
 export * from "./update-kra-template.type";
 export * from "./list-kra-templates.type";
+export * from "./kra-template-preset.type";
+export * from "./create-kra-template-preset.type";
+export * from "./update-kra-template-preset.type";
+export * from "./list-kra-template-presets.type";
+export * from "./kra-template-like.type";

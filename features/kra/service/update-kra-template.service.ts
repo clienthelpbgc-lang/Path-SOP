@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { kraTemplates } from "@/features/kra/schema";
-import { assertUserInCompany } from "@/features/kra/service/user-scope";
 import type { KraTemplate, UpdateKraTemplateInput } from "@/features/kra/types";
 import {
   kraTemplateIdSchema,
@@ -38,14 +37,6 @@ export async function updateKraTemplate(
     throw new ValidationError(
       "Invalid template data.",
       z.flattenError(result.error).fieldErrors,
-    );
-  }
-
-  if (result.data.defaultAssignee) {
-    await assertUserInCompany(
-      companyId,
-      result.data.defaultAssignee,
-      "Default assignee not found in your company.",
     );
   }
 

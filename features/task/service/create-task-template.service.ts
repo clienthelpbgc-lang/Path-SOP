@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { db } from "@/db";
 import { taskTemplates, tasks } from "@/features/task/schema";
-import { assertUserInCompany, assertUsersInCompany } from "@/features/task/service/user-scope";
 import type { CreateTaskTemplateInput, TaskTemplate } from "@/features/task/types";
 import { createTaskTemplateSchema } from "@/features/task/validators";
 import { BadRequestError, ValidationError } from "@/lib/errors";
@@ -39,20 +38,6 @@ export async function createTaskTemplate(
       throw new BadRequestError("Source task not found in your company.");
     }
   }
-
-  if (result.data.defaultAssignee) {
-    await assertUserInCompany(
-      companyId,
-      result.data.defaultAssignee,
-      "Default assignee not found in your company.",
-    );
-  }
-
-  await assertUsersInCompany(
-    companyId,
-    result.data.defaultWatchers,
-    "One or more default watchers were not found in your company.",
-  );
 
   try {
     const [template] = await db

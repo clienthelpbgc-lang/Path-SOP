@@ -4,7 +4,10 @@ import { useState } from "react";
 
 import type { UserRole } from "@/features/user/constants/role.constant";
 import { TaskTemplateList } from "@/components/task/table/task-template-list";
+import { TaskTemplatePresetList } from "@/components/task/table/task-template-preset-list";
 import { KraTemplateList } from "@/components/kra/table/kra-template-list";
+import { KraTemplatePresetList } from "@/components/kra/table/kra-template-preset-list";
+import { TemplateSourceTabs } from "@/components/templates/template-source-tabs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type TemplateTab = "task" | "kra";
@@ -30,7 +33,7 @@ export function TemplatesView({ role }: TemplatesViewProps) {
 
   return (
     <Tabs value={tab} onValueChange={(value) => setTab(value as TemplateTab)}>
-      <TabsList variant="line">
+      <TabsList variant="line" className="w-full">
         {templateTabs.map((item) => (
           <TabsTrigger key={item.value} value={item.value}>
             {item.label}
@@ -43,11 +46,17 @@ export function TemplatesView({ role }: TemplatesViewProps) {
           renders once and is just hidden, matching how TaskList keeps its
           own tab content mounted throughout. */}
       <TabsContent value="task" keepMounted>
-        <TaskTemplateList />
+        <TemplateSourceTabs
+          presets={<TaskTemplatePresetList />}
+          mine={<TaskTemplateList />}
+        />
       </TabsContent>
       {isAdmin && (
         <TabsContent value="kra" keepMounted>
-          <KraTemplateList />
+          <TemplateSourceTabs
+            presets={<KraTemplatePresetList />}
+            mine={<KraTemplateList />}
+          />
         </TabsContent>
       )}
     </Tabs>
