@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Building2, Menu } from "lucide-react";
+import { Building2, LogOut, Menu } from "lucide-react";
 
+import { logout } from "@/features/auth/actions";
 import type { CurrentUser } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,20 +40,32 @@ export function Header({ user }: { user: CurrentUser }) {
         {title}
       </h1>
 
-      <div className="ml-auto flex items-center gap-2 lg:hidden">
-        <Avatar size="sm" className="rounded-md after:rounded-md">
-          <AvatarImage
-            src={user.company.logo ?? undefined}
-            alt={user.company.name}
-            className="rounded-md object-contain"
-          />
-          <AvatarFallback className="rounded-md">
-            <Building2 className="size-3.5" />
-          </AvatarFallback>
-        </Avatar>
-        <span className="max-w-32 truncate text-xs font-medium text-muted-foreground">
-          {user.company.name}
-        </span>
+      <div className="ml-auto flex items-center gap-3">
+        <div className="flex items-center gap-2 lg:hidden">
+          <Avatar size="sm" className="rounded-md after:rounded-md">
+            <AvatarImage
+              src={user.company.logo ?? undefined}
+              alt={user.company.name}
+              className="rounded-md object-contain"
+            />
+            <AvatarFallback className="rounded-md">
+              <Building2 className="size-3.5" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="max-w-32 truncate text-xs font-medium text-muted-foreground">
+            {user.company.name}
+          </span>
+        </div>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => logout()}
+        >
+          <LogOut className="size-5" />
+          <span className="sr-only">Log out</span>
+        </Button>
       </div>
     </header>
   );

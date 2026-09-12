@@ -3,7 +3,6 @@ import {
   LayoutDashboard,
   LayoutTemplate,
   ListTodo,
-  Mail,
   Repeat,
   ShieldCheck,
   Target,
@@ -29,9 +28,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Gauge,
     roles: ["ADMIN"],
   },
-  { title: "Reports", href: "/reports", icon: Mail, roles: ["ADMIN"] },
   { title: "My Task", href: "/tasks", icon: ListTodo },
-  { title: "Task Admin", href: "/task-admin", icon: ShieldCheck, roles: ["ADMIN"] },
+  {
+    title: "Task Admin",
+    href: "/task-admin",
+    icon: ShieldCheck,
+    roles: ["ADMIN"],
+  },
   {
     title: "Repeating Tasks",
     href: "/repeating-tasks",
@@ -39,10 +42,14 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["ADMIN"],
   },
   { title: "My KRA", href: "/kra", icon: Target },
-  { title: "KRA Admin", href: "/kra-admin", icon: ShieldCheck, roles: ["ADMIN"] },
+  {
+    title: "KRA Admin",
+    href: "/kra-admin",
+    icon: ShieldCheck,
+    roles: ["ADMIN"],
+  },
   { title: "Templates", href: "/templates", icon: LayoutTemplate },
   { title: "Team Members", href: "/team-members", icon: Users },
-  { title: "Profile", href: "/profile", icon: UserCircle },
 ];
 
 export function getNavItems(role: UserRole): NavItem[] {

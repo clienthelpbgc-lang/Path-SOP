@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, ChevronsUpDown, LogOut, UserCircle } from "lucide-react";
+import { Building2, ChevronsUpDown, UserCircle } from "lucide-react";
 
-import { logout } from "@/features/auth/actions";
 import type { CurrentUser } from "@/lib/session";
 import { cn } from "@/lib/utils";
 import {
@@ -45,7 +44,7 @@ export function SidebarContent({
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2.5 px-4 py-5">
+      <div className="flex flex-col items-center gap-2.5 px-4 py-5">
         <Avatar size="default" className="rounded-lg after:rounded-lg">
           <AvatarImage
             src={user.company.logo ?? undefined}
@@ -59,9 +58,6 @@ export function SidebarContent({
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-sm font-semibold tracking-tight">
             {user.company.name}
-          </span>
-          <span className="text-xs text-sidebar-foreground/50">
-            Path SOP
           </span>
         </div>
       </div>
@@ -133,15 +129,9 @@ export function SidebarContent({
               <UserCircle />
               Profile
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={() => logout()}>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       <div className="flex flex-col items-center gap-1 border-t border-sidebar-border py-3">
         <div className="flex items-center gap-1.5 text-xs text-sidebar-foreground/50">
           <span>Powered by</span>
