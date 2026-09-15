@@ -16,6 +16,10 @@ function formatDueAt(date: Date): string {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    // Without this, formatting falls back to the server process's local
+    // zone (UTC in serverless) instead of the app's users' zone, so due
+    // times in notifications end up hours off from what's shown in the app.
+    timeZone: "Asia/Kolkata",
   }).format(date);
 }
 
