@@ -24,11 +24,14 @@ const titleSchema = z
   .min(2, "Title must be at least 2 characters long.")
   .max(200, "Title must not exceed 200 characters.");
 
+// Blank (or whitespace-only) input collapses to `undefined` rather than
+// failing validation -- this is an optional field everywhere it's used, so
+// "left empty" and "not provided" must mean the same thing.
 const descriptionSchema = z
   .string()
   .trim()
-  .min(1, "Description cannot be empty.")
-  .max(2000, "Description must not exceed 2000 characters.");
+  .max(2000, "Description must not exceed 2000 characters.")
+  .transform((value) => (value === "" ? undefined : value));
 
 const weightageSchema = z
   .number({ error: "Weightage must be a number." })

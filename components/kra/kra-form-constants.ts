@@ -14,4 +14,5 @@ export const KRA_STATUS_LABELS: Record<KraStatus, string> = {
   not_completed: "Not completed",
 };
 
-export const WEIGHTAGE_OPTIONS = Array.from({ length: 10 }, (_, index) => index + 1);
+export const KRA_WEIGHTAGE_MIN = 1;
+export const KRA_WEIGHTAGE_MAX = 50;

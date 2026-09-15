@@ -99,6 +99,13 @@
       "when": 1789202302743,
       "tag": "0013_add_template_presets",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1789459306569,
+      "tag": "0014_kra_weightage_max_50",
+      "breakpoints": true
     }
   ]
 }

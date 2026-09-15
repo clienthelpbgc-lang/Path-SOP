@@ -14,7 +14,8 @@ import {
 import {
   KRA_STATUS_LABELS,
   KRA_TYPE_LABELS,
-  WEIGHTAGE_OPTIONS,
+  KRA_WEIGHTAGE_MAX,
+  KRA_WEIGHTAGE_MIN,
 } from "@/components/kra/kra-form-constants";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -278,29 +279,21 @@ function EditKraForm({ kra, onOpenChange }: EditKraFormProps) {
             control={control}
             name="weightage"
             render={({ field }) => (
-              <Select
-                value={
-                  field.value !== undefined && field.value !== null
-                    ? String(field.value)
-                    : undefined
-                }
-                onValueChange={(value) => field.onChange(Number(value))}
-              >
-                <SelectTrigger
-                  id="edit-kra-weightage"
-                  aria-invalid={!!errors.weightage}
-                  className="w-full"
-                >
-                  <SelectValue placeholder="Select weightage" />
-                </SelectTrigger>
-                <SelectContent>
-                  {WEIGHTAGE_OPTIONS.map((value) => (
-                    <SelectItem key={value} value={String(value)}>
-                      {value}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                id="edit-kra-weightage"
+                type="number"
+                inputMode="numeric"
+                min={KRA_WEIGHTAGE_MIN}
+                max={KRA_WEIGHTAGE_MAX}
+                step={1}
+                aria-invalid={!!errors.weightage}
+                value={field.value ?? ""}
+                onChange={(event) => {
+                  const raw = event.target.value;
+                  field.onChange(raw === "" ? undefined : Number(raw));
+                }}
+                onBlur={field.onBlur}
+              />
             )}
           />
           {errors.weightage && (

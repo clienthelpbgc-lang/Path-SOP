@@ -1,4 +1,14 @@
-import { boolean, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 import { platformAdmins } from "@/features/platform-admin/schema";
 
@@ -32,5 +42,9 @@ export const kraTemplatePresets = pgTable(
   },
   (table) => [
     index("kra_template_presets_is_active_idx").on(table.isActive),
+    check(
+      "kra_template_presets_weightage_range_check",
+      sql`${table.weightage} >= 1 AND ${table.weightage} <= 50`,
+    ),
   ],
 );

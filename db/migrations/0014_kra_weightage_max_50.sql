@@ -1,0 +1,4 @@
+ALTER TABLE "kras" DROP CONSTRAINT "kras_weightage_range_check";--> statement-breakpoint
+ALTER TABLE "kra_template_presets" ADD CONSTRAINT "kra_template_presets_weightage_range_check" CHECK ("kra_template_presets"."weightage" >= 1 AND "kra_template_presets"."weightage" <= 50);--> statement-breakpoint
+ALTER TABLE "kra_templates" ADD CONSTRAINT "kra_templates_weightage_range_check" CHECK ("kra_templates"."weightage" >= 1 AND "kra_templates"."weightage" <= 50);--> statement-breakpoint
+ALTER TABLE "kras" ADD CONSTRAINT "kras_weightage_range_check" CHECK ("kras"."weightage" >= 1 AND "kras"."weightage" <= 50);

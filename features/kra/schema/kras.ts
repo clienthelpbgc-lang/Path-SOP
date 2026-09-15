@@ -61,7 +61,7 @@ export const kras = pgTable(
     ),
     check(
       "kras_weightage_range_check",
-      sql`${table.weightage} >= 1 AND ${table.weightage} <= 10`,
+      sql`${table.weightage} >= 1 AND ${table.weightage} <= 50`,
     ),
   ],
 );

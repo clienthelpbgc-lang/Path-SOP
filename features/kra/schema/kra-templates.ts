@@ -1,6 +1,7 @@
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
   boolean,
+  check,
   index,
   integer,
   pgTable,
@@ -9,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 import { companies } from "@/features/company/schema";
 import { users } from "@/features/user/schema";
@@ -48,5 +50,9 @@ export const kraTemplates = pgTable(
       table.isActive,
     ),
     uniqueIndex("kra_templates_source_kra_id_unique").on(table.sourceKraId),
+    check(
+      "kra_templates_weightage_range_check",
+      sql`${table.weightage} >= 1 AND ${table.weightage} <= 50`,
+    ),
   ],
 );

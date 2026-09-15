@@ -11,7 +11,11 @@ import {
 } from "@/features/kra/hooks";
 import type { KraTemplatePreset } from "@/features/kra/types";
 import { createKraTemplatePresetSchema } from "@/features/kra/validators";
-import { KRA_TYPE_LABELS, WEIGHTAGE_OPTIONS } from "@/components/kra/kra-form-constants";
+import {
+  KRA_TYPE_LABELS,
+  KRA_WEIGHTAGE_MAX,
+  KRA_WEIGHTAGE_MIN,
+} from "@/components/kra/kra-form-constants";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DialogFooter } from "@/components/ui/dialog";
@@ -177,29 +181,21 @@ export function KraTemplatePresetForm({
               control={control}
               name="weightage"
               render={({ field }) => (
-                <Select
-                  value={
-                    field.value !== undefined && field.value !== null
-                      ? String(field.value)
-                      : undefined
-                  }
-                  onValueChange={(value) => field.onChange(Number(value))}
-                >
-                  <SelectTrigger
-                    id="kra-preset-weightage"
-                    aria-invalid={!!errors.weightage}
-                    className="w-full"
-                  >
-                    <SelectValue placeholder="Select weightage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {WEIGHTAGE_OPTIONS.map((value) => (
-                      <SelectItem key={value} value={String(value)}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="kra-preset-weightage"
+                  type="number"
+                  inputMode="numeric"
+                  min={KRA_WEIGHTAGE_MIN}
+                  max={KRA_WEIGHTAGE_MAX}
+                  step={1}
+                  aria-invalid={!!errors.weightage}
+                  value={field.value ?? ""}
+                  onChange={(event) => {
+                    const raw = event.target.value;
+                    field.onChange(raw === "" ? undefined : Number(raw));
+                  }}
+                  onBlur={field.onBlur}
+                />
               )}
             />
             {errors.weightage && (

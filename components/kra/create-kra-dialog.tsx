@@ -12,7 +12,11 @@ import {
   checkPeriodEndAfterStart,
   kraBaseSchema,
 } from "@/features/kra/validators";
-import { KRA_TYPE_LABELS, WEIGHTAGE_OPTIONS } from "@/components/kra/kra-form-constants";
+import {
+  KRA_TYPE_LABELS,
+  KRA_WEIGHTAGE_MAX,
+  KRA_WEIGHTAGE_MIN,
+} from "@/components/kra/kra-form-constants";
 import { AssigneeCombobox } from "@/components/team/assignee-combobox";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -309,29 +313,21 @@ export function CreateKraDialog({
                 control={control}
                 name="weightage"
                 render={({ field }) => (
-                  <Select
-                    value={
-                      field.value !== undefined && field.value !== null
-                        ? String(field.value)
-                        : undefined
-                    }
-                    onValueChange={(value) => field.onChange(Number(value))}
-                  >
-                    <SelectTrigger
-                      id="weightage"
-                      aria-invalid={!!errors.weightage}
-                      className="w-full"
-                    >
-                      <SelectValue placeholder="Select weightage" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {WEIGHTAGE_OPTIONS.map((value) => (
-                        <SelectItem key={value} value={String(value)}>
-                          {value}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input
+                    id="weightage"
+                    type="number"
+                    inputMode="numeric"
+                    min={KRA_WEIGHTAGE_MIN}
+                    max={KRA_WEIGHTAGE_MAX}
+                    step={1}
+                    aria-invalid={!!errors.weightage}
+                    value={field.value ?? ""}
+                    onChange={(event) => {
+                      const raw = event.target.value;
+                      field.onChange(raw === "" ? undefined : Number(raw));
+                    }}
+                    onBlur={field.onBlur}
+                  />
                 )}
               />
               {errors.weightage && (

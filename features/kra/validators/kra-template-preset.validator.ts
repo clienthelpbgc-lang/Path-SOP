@@ -18,11 +18,14 @@ const titleSchema = z
   .min(2, "Title must be at least 2 characters long.")
   .max(200, "Title must not exceed 200 characters.");
 
+// Blank (or whitespace-only) input collapses to `undefined` rather than
+// failing validation -- this is an optional field everywhere it's used, so
+// "left empty" and "not provided" must mean the same thing.
 const descriptionSchema = z
   .string()
   .trim()
-  .min(1, "Description cannot be empty.")
-  .max(2000, "Description must not exceed 2000 characters.");
+  .max(2000, "Description must not exceed 2000 characters.")
+  .transform((value) => (value === "" ? undefined : value));
 
 const typeSchema = z.enum(KRA_TYPES, {
   error: "Please provide a valid type.",
@@ -32,13 +35,14 @@ const weightageSchema = z
   .number({ error: "Weightage must be a number." })
   .int("Weightage must be an integer.")
   .min(1, "Weightage must be at least 1.")
-  .max(10, "Weightage must not exceed 10.");
+  .max(50, "Weightage must not exceed 50.");
 
+// Same "blank means not provided" behavior as descriptionSchema above.
 const remarksSchema = z
   .string()
   .trim()
-  .min(1, "Remarks cannot be empty.")
-  .max(1000, "Remarks must not exceed 1000 characters.");
+  .max(1000, "Remarks must not exceed 1000 characters.")
+  .transform((value) => (value === "" ? undefined : value));
 
 const isActiveSchema = z.boolean({
   error: "isActive must be true or false.",
