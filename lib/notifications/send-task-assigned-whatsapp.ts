@@ -5,6 +5,10 @@ export type TaskAssignedWhatsAppInput = {
   recipientName: string;
   taskTitle: string;
   assignedByName: string;
+  dueAtLabel: string;
+  // Who the task is assigned to -- only used by the watcher template, which
+  // tells the watcher who owns the task rather than who added them.
+  assigneeName: string;
   // Watchers get a different approved template ("added as a watcher")
   // rather than the direct-assignment one, mirroring the wording split in
   // send-task-assigned-email.ts.
@@ -24,12 +28,12 @@ export async function sendTaskAssignedWhatsApp(
   await sendWhatsAppTemplateMessage({
     to: input.to,
     templateName,
-    // Order must match the approved template's {{1}}, {{2}}, {{3}}
-    // placeholders -- see the setup notes for the exact template text.
-    // Due date is deliberately left out of the message body: Meta rejects
-    // templates that pack too many variables into too little static text,
-    // so the message points the recipient to the app for full details
-    // instead of trying to fit everything inline.
-    bodyParams: [input.recipientName, input.assignedByName, input.taskTitle],
+    // Order must match the approved template's {{1}}, {{2}}, {{3}}, {{4}}
+    // placeholders -- see the setup notes for the exact template text. The
+    // two templates use {{4}} for different things: task_assigned's is the
+    // due date, task_watcher_added's is the assignee's name.
+    bodyParams: input.asWatcher
+      ? [input.recipientName, input.taskTitle, input.dueAtLabel, input.assigneeName]
+      : [input.recipientName, input.assignedByName, input.taskTitle, input.dueAtLabel],
   });
 }

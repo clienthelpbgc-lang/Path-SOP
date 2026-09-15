@@ -34,6 +34,7 @@ async function notify(
   task: NotifiableTask,
   assignedByName: string,
   asWatcher: boolean,
+  assigneeName: string,
 ): Promise<void> {
   const dueAtLabel = formatDueAt(task.dueAt);
 
@@ -58,6 +59,8 @@ async function notify(
         recipientName: recipient.name,
         taskTitle: task.title,
         assignedByName,
+        dueAtLabel,
+        assigneeName,
         asWatcher,
       }).catch((error) => {
         console.error(
@@ -74,9 +77,9 @@ async function notify(
 // fired once when the task (and its initial watcher list) is created.
 export async function notifyTaskAssignment(task: TaskWithRelations): Promise<void> {
   await Promise.all([
-    notify(task.assignee, task, task.creator.name, false),
+    notify(task.assignee, task, task.creator.name, false, task.assignee.name),
     ...task.watchers.map((watcher) =>
-      notify(watcher.user, task, task.creator.name, true),
+      notify(watcher.user, task, task.creator.name, true, task.assignee.name),
     ),
   ]);
 }
@@ -87,7 +90,7 @@ export async function notifyTaskReassignment(
   assignee: Recipient,
   assignedByName: string,
 ): Promise<void> {
-  await notify(assignee, task, assignedByName, false);
+  await notify(assignee, task, assignedByName, false, assignee.name);
 }
 
 // Notifies a user added as a watcher after the task already exists.
@@ -95,6 +98,7 @@ export async function notifyWatcherAdded(
   task: NotifiableTask,
   watcher: Recipient,
   assignedByName: string,
+  assigneeName: string,
 ): Promise<void> {
-  await notify(watcher, task, assignedByName, true);
+  await notify(watcher, task, assignedByName, true, assigneeName);
 }

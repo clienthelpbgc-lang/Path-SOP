@@ -59,6 +59,7 @@ export async function createTaskWatcher(
       title: tasks.title,
       description: tasks.description,
       dueAt: tasks.dueAt,
+      assignedTo: tasks.assignedTo,
     })
     .from(tasks)
     .where(eq(tasks.id, taskId))
@@ -75,7 +76,15 @@ export async function createTaskWatcher(
     .limit(1);
 
   if (taskRow && watcherUser && actorUser) {
-    await notifyWatcherAdded(taskRow, watcherUser, actorUser.name);
+    const [assigneeUser] = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, taskRow.assignedTo))
+      .limit(1);
+
+    if (assigneeUser) {
+      await notifyWatcherAdded(taskRow, watcherUser, actorUser.name, assigneeUser.name);
+    }
   }
 
   return watcher;
