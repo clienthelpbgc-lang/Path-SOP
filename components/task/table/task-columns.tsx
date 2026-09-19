@@ -13,6 +13,7 @@ import {
 } from "@/components/task/task-status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function initials(name: string) {
   return name
@@ -79,6 +80,11 @@ type GetTaskColumnsOptions = {
   // still-open live occurrence -- schedule/status columns say nothing
   // useful there and just crowd out the stop-repeating action.
   showScheduleColumns?: boolean;
+  // Adds a leading checkbox column for bulk selection (e.g. "Mark complete"
+  // on multiple rows at once). Selectability per row is still governed by
+  // the table's `isRowSelectable`/`enableRowSelection` -- this only decides
+  // whether the column itself is rendered.
+  enableSelection?: boolean;
 };
 
 export function getTaskColumns({
@@ -87,8 +93,38 @@ export function getTaskColumns({
   currentUserId,
   showStopRepeating = false,
   showScheduleColumns = true,
+  enableSelection = false,
 }: GetTaskColumnsOptions): ColumnDef<Task, unknown>[] {
   const columns = [
+    enableSelection &&
+      columnHelper.display({
+        id: "select",
+        header: ({ table }) => (
+          <div onClick={(event) => event.stopPropagation()}>
+            <Checkbox
+              checked={table.getIsAllPageRowsSelected()}
+              indeterminate={
+                !table.getIsAllPageRowsSelected() &&
+                table.getIsSomePageRowsSelected()
+              }
+              onCheckedChange={(checked) =>
+                table.toggleAllPageRowsSelected(checked)
+              }
+              aria-label="Select all tasks on this page"
+            />
+          </div>
+        ),
+        cell: ({ row }) =>
+          row.getCanSelect() ? (
+            <div onClick={(event) => event.stopPropagation()}>
+              <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(checked) => row.toggleSelected(checked)}
+                aria-label={`Select ${row.original.title}`}
+              />
+            </div>
+          ) : null,
+      }),
     columnHelper.accessor("title", {
       header: "Title",
       cell: ({ row }) => (

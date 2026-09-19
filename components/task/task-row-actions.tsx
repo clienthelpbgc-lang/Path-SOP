@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import type { Task } from "@/features/task/types";
+import { canCompleteTask } from "@/features/task/utils/can-complete-task";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,11 +34,10 @@ type TaskRowActionsProps = {
 export function TaskRowActions({ task, currentUserId }: TaskRowActionsProps) {
   const [openDialog, setOpenDialog] = useState<DialogKind>(null);
 
-  const isAssignee = task.assignedTo === currentUserId;
   const isCreator = task.createdBy === currentUserId;
   const isPending = task.status === "pending";
 
-  const canComplete = isAssignee && task.status !== "completed";
+  const canComplete = canCompleteTask(task, currentUserId);
   const canEdit = isCreator && isPending;
   const canDelete = isCreator && isPending;
   const canCreateTemplate = isCreator;

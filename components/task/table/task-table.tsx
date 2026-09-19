@@ -5,6 +5,8 @@ import {
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
+  type OnChangeFn,
+  type RowSelectionState,
 } from "@tanstack/react-table";
 
 import type { Task } from "@/features/task/types";
@@ -36,6 +38,11 @@ type TaskTableProps = {
   data: Task[];
   isLoading: boolean;
   onRowClick?: (task: Task) => void;
+  // Row-selection checkboxes are opt-in: omitting these leaves the table
+  // exactly as it was before bulk actions existed.
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  isRowSelectable?: (task: Task) => boolean;
 };
 
 // Filtering, sorting and pagination all happen server-side (see TaskList /
@@ -46,12 +53,20 @@ export function TaskTable({
   data,
   isLoading,
   onRowClick,
+  rowSelection,
+  onRowSelectionChange,
+  isRowSelectable,
 }: TaskTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (task) => task.id,
+    enableRowSelection: isRowSelectable
+      ? (row) => isRowSelectable(row.original)
+      : false,
+    onRowSelectionChange,
+    state: rowSelection ? { rowSelection } : undefined,
   });
 
   return (
@@ -63,7 +78,11 @@ export function TaskTable({
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className={header.column.id === "actions" ? "w-10" : undefined}
+                  className={
+                    header.column.id === "actions" || header.column.id === "select"
+                      ? "w-10"
+                      : undefined
+                  }
                 >
                   {header.isPlaceholder
                     ? null
