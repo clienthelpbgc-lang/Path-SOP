@@ -1,3 +1,8 @@
+import {
+  buildEmailLayout,
+  PATHSOP_LOGO_SRC,
+  pathsopLogoAttachment,
+} from "@/lib/notifications/email-layout";
 import { transporter } from "@/lib/notifications/mail-transport";
 
 export type TaskAssignedEmailInput = {
@@ -24,22 +29,24 @@ function buildHtml(input: TaskAssignedEmailInput): string {
     asWatcher,
   } = input;
 
-  const intro = asWatcher
-    ? `${assignedByName} added you as a watcher on this task, so you'll be kept in the loop:`
-    : `${assignedByName} assigned you a new task:`;
-
-  return `
-    <div style="font-family: -apple-system, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto; color: #1f2937;">
-      <p>Hi ${recipientName},</p>
-      <p>${intro}</p>
-      <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin: 16px 0;">
-        <p style="margin: 0 0 8px; font-weight: 600; font-size: 16px;">${taskTitle}</p>
-        ${taskDescription ? `<p style="margin: 0 0 8px; color: #4b5563;">${taskDescription}</p>` : ""}
-        <p style="margin: 0; color: #4b5563;">Due: ${dueAtLabel}</p>
-      </div>
-      ${taskUrl ? `<p><a href="${taskUrl}" style="color: #4f46e5;">View task</a></p>` : ""}
-    </div>
-  `;
+  return buildEmailLayout({
+    previewText: asWatcher
+      ? `You're now watching "${taskTitle}" on Path SOP.`
+      : `${assignedByName} assigned you a new task on Path SOP.`,
+    badgeLabel: asWatcher ? "Watching" : "New task",
+    badgeTone: asWatcher ? "blue" : "green",
+    heading: asWatcher ? "You're now watching a task" : "You have a new task",
+    recipientName,
+    introHtml: asWatcher
+      ? `<strong>${assignedByName}</strong> added you as a watcher on this task, so you'll be kept in the loop:`
+      : `<strong>${assignedByName}</strong> assigned you a new task:`,
+    taskTitle,
+    taskDescription,
+    metaRows: [{ label: "Due", value: dueAtLabel }],
+    ctaUrl: taskUrl,
+    ctaLabel: "View task",
+    logoSrc: PATHSOP_LOGO_SRC,
+  });
 }
 
 // Throws on failure -- the caller (notify-task-assignment.service.ts) is
@@ -56,5 +63,6 @@ export async function sendTaskAssignedEmail(
       ? `Added as watcher: ${input.taskTitle}`
       : `New task assigned: ${input.taskTitle}`,
     html: buildHtml(input),
+    attachments: [pathsopLogoAttachment],
   });
 }

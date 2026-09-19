@@ -297,9 +297,9 @@ export function CreateTaskDialog({
         <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
           <div className="-mr-1 flex max-h-[65vh] flex-col gap-5 overflow-y-auto pr-1">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="task">Task</Label>
               <Input
-                id="title"
+                id="task"
                 placeholder="e.g. Follow up with client on invoice"
                 aria-invalid={!!errors.title}
                 {...register("title")}
