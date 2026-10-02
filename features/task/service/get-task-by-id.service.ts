@@ -2,8 +2,9 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "@/db";
+import { crmLeads, crmLeadTasks, crmStages } from "@/db/external/crm";
 import { tasks } from "@/features/task/schema";
-import type { TaskWithRelations } from "@/features/task/types";
+import type { TaskCrmLead, TaskWithRelations } from "@/features/task/types";
 import { taskIdSchema } from "@/features/task/validators";
 import { NotFoundError, ValidationError } from "@/lib/errors";
 
@@ -38,5 +39,37 @@ export async function getTaskById(
     throw new NotFoundError("Task not found.");
   }
 
-  return task;
+  return { ...task, crmLead: await getTaskCrmLead(companyId, task.id) };
+}
+
+async function getTaskCrmLead(
+  companyId: string,
+  taskId: string,
+): Promise<TaskCrmLead | null> {
+  const [row] = await db
+    .select({
+      id: crmLeads.id,
+      number: crmLeads.number,
+      contactName: crmLeads.contactName,
+      businessName: crmLeads.businessName,
+      phone: crmLeads.phone,
+      email: crmLeads.email,
+      priority: crmLeads.priority,
+      stage: { name: crmStages.name, color: crmStages.color },
+      archivedAt: crmLeads.archivedAt,
+    })
+    .from(crmLeadTasks)
+    .innerJoin(crmLeads, eq(crmLeads.id, crmLeadTasks.leadId))
+    .innerJoin(crmStages, eq(crmStages.id, crmLeads.stageId))
+    .where(
+      and(eq(crmLeadTasks.taskId, taskId), eq(crmLeadTasks.companyId, companyId)),
+    )
+    .limit(1);
+
+  if (!row) {
+    return null;
+  }
+
+  const { archivedAt, ...lead } = row;
+  return { ...lead, archived: archivedAt !== null };
 }

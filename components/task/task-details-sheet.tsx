@@ -5,6 +5,7 @@ import {
   CalendarClock,
   CheckCircle2,
   Circle,
+  ExternalLink,
   FileIcon,
   Repeat,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import { useTask } from "@/features/task/hooks";
 import type { ReminderAnchor } from "@/features/task/constants/reminder-anchor.constant";
 import type { ReminderChannel } from "@/features/task/constants/reminder-channel.constant";
 import type { RepeatUnit } from "@/features/task/constants/repeat-unit.constant";
+import type { TaskCrmLead } from "@/features/task/types";
 import { formatReminderOffset } from "@/features/task/utils/format-reminder-offset";
 import {
   TaskStatusBadge,
@@ -109,6 +111,87 @@ function PartyRow({ name, email }: { name: string; email: string }) {
   );
 }
 
+// Where "Open in CRM" goes; without it the lead is shown but not linked.
+const CRM_URL = process.env.NEXT_PUBLIC_CRM_URL?.replace(/\/+$/, "");
+
+const CRM_PRIORITY_LABELS: Record<string, string> = {
+  HOT: "Hot",
+  NORMAL: "Normal",
+  CASUAL: "Casual",
+};
+
+// 7 -> "L-007", as the CRM numbers its leads.
+function formatLeadNumber(number: number) {
+  return `L-${String(number).padStart(3, "0")}`;
+}
+
+// The CRM lead behind a follow-up task the CRM created, read live from the
+// CRM's tables -- so a renamed contact or a moved stage shows here at once.
+function CrmLeadCard({ lead }: { lead: TaskCrmLead }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium text-foreground">
+          CRM lead {formatLeadNumber(lead.number)}
+        </span>
+        {CRM_URL && (
+          <a
+            href={`${CRM_URL}/leads/${lead.id}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+          >
+            Open in CRM
+            <ExternalLink className="size-3" />
+          </a>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <DetailField label="Contact">
+          <span className="text-sm">
+            {lead.contactName}
+            {lead.businessName && (
+              <span className="block text-xs text-muted-foreground">
+                {lead.businessName}
+              </span>
+            )}
+          </span>
+        </DetailField>
+
+        <DetailField label="Stage">
+          <span className="flex items-center gap-1.5 text-sm">
+            <span
+              className="size-2 shrink-0 rounded-full"
+              style={{ backgroundColor: lead.stage.color }}
+            />
+            {lead.archived ? `${lead.stage.name} (archived)` : lead.stage.name}
+            {" · "}
+            {CRM_PRIORITY_LABELS[lead.priority] ?? lead.priority}
+          </span>
+        </DetailField>
+
+        <DetailField label="Phone">
+          <a href={`tel:${lead.phone}`} className="text-sm hover:underline">
+            {lead.phone}
+          </a>
+        </DetailField>
+
+        {lead.email && (
+          <DetailField label="Email">
+            <a
+              href={`mailto:${lead.email}`}
+              className="block truncate text-sm hover:underline"
+            >
+              {lead.email}
+            </a>
+          </DetailField>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function DetailsSkeleton() {
   return (
     <div className="flex flex-col gap-5 p-4">
@@ -154,6 +237,8 @@ export function TaskDetailsSheet({
             <Separator />
 
             <div className="flex flex-col gap-5 p-5">
+              {task.crmLead && <CrmLeadCard lead={task.crmLead} />}
+
               {task.description && (
                 <DetailField label="Description">
                   <p className="whitespace-pre-wrap text-sm">

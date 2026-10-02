@@ -1,5 +1,6 @@
 export * from "./task.type";
 export * from "./task-with-relations.type";
+export * from "./task-crm-lead.type";
 export * from "./create-task-with-relations.type";
 export * from "./update-task.type";
 export * from "./list-tasks.type";
