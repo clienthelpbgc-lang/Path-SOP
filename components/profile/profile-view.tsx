@@ -6,6 +6,7 @@ import type { UserRole } from "@/features/user/constants/role.constant";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChangePasswordDialog } from "@/components/profile/change-password-dialog";
 import { EditProfileDialog } from "@/components/profile/edit-profile-dialog";
 import { getAvatarColor } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
@@ -112,7 +113,10 @@ export function ProfileView({
               </div>
             </div>
 
-            <EditProfileDialog name={name} phone={phone} />
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <ChangePasswordDialog />
+              <EditProfileDialog name={name} phone={phone} />
+            </div>
           </div>
 
           <div className="grid gap-5 border-t border-border pt-6 sm:grid-cols-2">

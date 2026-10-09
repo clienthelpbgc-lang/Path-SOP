@@ -9,3 +9,4 @@ export * from "./task-template-preset.validator";
 export * from "./task-template.validator";
 export * from "./task-watcher.validator";
 export * from "./task.validator";
+export * from "./bulk-delete-tasks.validator";

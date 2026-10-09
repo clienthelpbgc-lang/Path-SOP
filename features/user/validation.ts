@@ -29,7 +29,9 @@ const roleSchema = z.enum(USER_ROLES, {
 
 const isActiveSchema = z.boolean({ error: "isActive must be true or false." });
 
-const passwordSchema = z
+// Shared with the auth flows (reset/change password) so every place a
+// password is set enforces the same policy.
+export const passwordSchema = z
   .string({ error: "Password is required." })
   .min(8, "Password must be at least 8 characters long.")
   .regex(/[A-Za-z]/, "Password must contain at least one letter.")

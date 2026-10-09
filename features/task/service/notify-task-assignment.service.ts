@@ -78,10 +78,15 @@ async function notify(
 }
 
 // Notifies the assignee and every watcher that they've been put on a task --
-// fired once when the task (and its initial watcher list) is created.
+// fired once when the task (and its initial watcher list) is created. A
+// self-assigned task skips the assignee: they created it themselves.
 export async function notifyTaskAssignment(task: TaskWithRelations): Promise<void> {
+  const isSelfAssigned = task.assignee.id === task.creator.id;
+
   await Promise.all([
-    notify(task.assignee, task, task.creator.name, false, task.assignee.name),
+    ...(isSelfAssigned
+      ? []
+      : [notify(task.assignee, task, task.creator.name, false, task.assignee.name)]),
     ...task.watchers.map((watcher) =>
       notify(watcher.user, task, task.creator.name, true, task.assignee.name),
     ),

@@ -14,6 +14,10 @@ type AssigneeComboboxProps = {
   onValueChange: (userId: string) => void;
   placeholder?: string;
   "aria-invalid"?: boolean;
+  // Users whose names should resolve even when they aren't in the current
+  // search page -- e.g. the signed-in user (for "Assign to me") or a task's
+  // existing assignee, which may sit past the first page of results.
+  knownUsers?: Pick<User, "id" | "name">[];
 };
 
 // Search-as-you-type team member picker, shared by every "assign to" field
@@ -25,6 +29,7 @@ export function AssigneeCombobox({
   onValueChange,
   placeholder = "Search team members...",
   "aria-invalid": ariaInvalid,
+  knownUsers = [],
 }: AssigneeComboboxProps) {
   const { setSearch, users, isFetching } = useUserSearch();
 
@@ -45,7 +50,9 @@ export function AssigneeCombobox({
       itemToStringLabel={(userId: string) =>
         selectedUser?.id === userId
           ? selectedUser.name
-          : (users.find((user) => user.id === userId)?.name ?? "")
+          : (users.find((user) => user.id === userId)?.name ??
+            knownUsers.find((user) => user.id === userId)?.name ??
+            "")
       }
     >
       <ComboboxInput id={id} placeholder={placeholder} aria-invalid={ariaInvalid} />

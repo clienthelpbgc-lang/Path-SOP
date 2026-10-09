@@ -52,15 +52,17 @@ export function getKraColumns({
     columnHelper.accessor("title", {
       header: "Title",
       cell: ({ row }) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="flex items-center gap-1.5 font-medium text-foreground">
+        <div className="flex max-w-64 flex-col gap-0.5">
+          <span className="flex min-w-0 items-start gap-1.5 font-medium text-foreground">
             {row.original.repeat && (
               <Repeat
-                className="size-3.5 shrink-0 text-muted-foreground"
+                className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
                 aria-label="Repeats every period"
               />
             )}
-            {row.original.title}
+            <span className="whitespace-normal break-words">
+              {row.original.title}
+            </span>
           </span>
           {row.original.description && (
             <span className="max-w-64 truncate text-xs text-muted-foreground">
@@ -68,6 +70,45 @@ export function getKraColumns({
             </span>
           )}
         </div>
+      ),
+    }),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: ({ getValue }) => <KraStatusBadge status={getValue()} />,
+    }),
+    columnHelper.accessor("weightage", {
+      header: "Weightage",
+      cell: ({ getValue }) => (
+        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-medium text-foreground">
+          {getValue()}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("type", {
+      header: "Type",
+      cell: ({ getValue }) => (
+        <span className="text-foreground">{KRA_TYPE_LABELS[getValue()]}</span>
+      ),
+    }),
+    columnHelper.display({
+      id: "period",
+      header: "Period",
+      cell: ({ row }) => (
+        <span className="text-foreground">
+          {formatDate(row.original.periodStart)} –{" "}
+          {formatDate(row.original.periodEnd)}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("assignedBy", {
+      id: "assignedBy",
+      header: "Assigned by",
+      cell: ({ getValue }) => (
+        <span className="text-foreground">
+          {userNames.get(getValue()) ?? (
+            <span className="text-muted-foreground">Unknown</span>
+          )}
+        </span>
       ),
     }),
     showAssigneeColumn &&
@@ -89,45 +130,6 @@ export function getKraColumns({
           );
         },
       }),
-    columnHelper.accessor("assignedBy", {
-      id: "assignedBy",
-      header: "Assigned by",
-      cell: ({ getValue }) => (
-        <span className="text-foreground">
-          {userNames.get(getValue()) ?? (
-            <span className="text-muted-foreground">Unknown</span>
-          )}
-        </span>
-      ),
-    }),
-    columnHelper.accessor("type", {
-      header: "Type",
-      cell: ({ getValue }) => (
-        <span className="text-foreground">{KRA_TYPE_LABELS[getValue()]}</span>
-      ),
-    }),
-    columnHelper.display({
-      id: "period",
-      header: "Period",
-      cell: ({ row }) => (
-        <span className="text-foreground">
-          {formatDate(row.original.periodStart)} –{" "}
-          {formatDate(row.original.periodEnd)}
-        </span>
-      ),
-    }),
-    columnHelper.accessor("weightage", {
-      header: "Weightage",
-      cell: ({ getValue }) => (
-        <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-muted px-1.5 text-xs font-medium text-foreground">
-          {getValue()}
-        </span>
-      ),
-    }),
-    columnHelper.accessor("status", {
-      header: "Status",
-      cell: ({ getValue }) => <KraStatusBadge status={getValue()} />,
-    }),
     canManage &&
       columnHelper.display({
         id: "actions",

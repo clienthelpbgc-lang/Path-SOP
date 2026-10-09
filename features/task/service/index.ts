@@ -11,6 +11,7 @@ export * from "./create-task-template-preset.service";
 export * from "./delete-task-template-preset.service";
 export * from "./delete-task-template.service";
 export * from "./delete-task-watcher.service";
+export * from "./bulk-delete-tasks.service";
 export * from "./delete-task.service";
 export * from "./dispatch-reminders.service";
 export * from "./generate-recurring-tasks.service";

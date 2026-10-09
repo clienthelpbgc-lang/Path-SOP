@@ -4,7 +4,11 @@ import { type NextRequest, NextResponse } from "next/server";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-const PUBLIC_PATHS = ["/login"];
+// Signed-out-only pages: a signed-in user is sent home instead.
+const PUBLIC_PATHS = ["/login", "/forgot-password"];
+// Reachable either way: a reset link must still work if the browser that
+// opens it happens to have a session.
+const OPEN_PATHS = ["/reset-password"];
 
 export const updateSession = async (request: NextRequest) => {
   // Create an unmodified response
@@ -44,6 +48,7 @@ export const updateSession = async (request: NextRequest) => {
   const isApiRoute =
     pathname.startsWith("/api") || pathname.startsWith("/.netlify/functions");
   const isPublicPath = PUBLIC_PATHS.includes(pathname);
+  const isOpenPath = OPEN_PATHS.includes(pathname);
 
   // Route Handlers enforce their own auth (via lib/session.ts) and return
   // JSON 401s; redirecting them to an HTML login page would break API
@@ -51,7 +56,7 @@ export const updateSession = async (request: NextRequest) => {
   // Functions (netlify/functions/*) are invoked directly at
   // /.netlify/functions/* by Netlify's scheduler, not through the app's own
   // routes, but they hit this same proxy first -- same reasoning applies.
-  if (!user && !isApiRoute && !isPublicPath) {
+  if (!user && !isApiRoute && !isPublicPath && !isOpenPath) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

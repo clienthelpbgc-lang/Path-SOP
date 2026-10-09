@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api-client";
 import type {
+  BulkDeleteTasksResult,
   CreateTaskAttachmentInput,
   CreateTaskChecklistItemInput,
   CreateTaskReminderInput,
@@ -62,6 +63,13 @@ export function updateTaskRequest(id: string, input: UpdateTaskInput) {
 export function deleteTaskRequest(id: string) {
   return apiFetch<Task>(`${BASE_URL}/${id}`, {
     method: "DELETE",
+  });
+}
+
+export function bulkDeleteTasksRequest(ids: string[]) {
+  return apiFetch<BulkDeleteTasksResult>(`${BASE_URL}/bulk-delete`, {
+    method: "POST",
+    body: JSON.stringify({ ids }),
   });
 }
 

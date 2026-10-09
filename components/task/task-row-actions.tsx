@@ -11,6 +11,7 @@ import {
 
 import type { Task } from "@/features/task/types";
 import { canCompleteTask } from "@/features/task/utils/can-complete-task";
+import { canDeleteTask } from "@/features/task/utils/can-delete-task";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,7 +40,7 @@ export function TaskRowActions({ task, currentUserId }: TaskRowActionsProps) {
 
   const canComplete = canCompleteTask(task, currentUserId);
   const canEdit = isCreator && isPending;
-  const canDelete = isCreator && isPending;
+  const canDelete = canDeleteTask(task, currentUserId);
   const canCreateTemplate = isCreator;
 
   if (!canComplete && !canEdit && !canDelete && !canCreateTemplate) {

@@ -209,11 +209,21 @@ export async function updateTask(
     translateDatabaseError(error);
   }
 
-  if (updateValues.assignedTo) {
+  // The edit form always sends `assignedTo`, so only an actual change of
+  // assignee counts as a reassignment -- and nobody needs to be told about a
+  // task they just assigned to themselves.
+  const reassignedTo =
+    updateValues.assignedTo &&
+    updateValues.assignedTo !== existing.assignedTo &&
+    updateValues.assignedTo !== userId
+      ? updateValues.assignedTo
+      : null;
+
+  if (reassignedTo) {
     const [assigneeRow] = await db
       .select({ name: users.name, email: users.email, phone: users.phone })
       .from(users)
-      .where(eq(users.id, updateValues.assignedTo))
+      .where(eq(users.id, reassignedTo))
       .limit(1);
     const [actorRow] = await db
       .select({ name: users.name })

@@ -22,8 +22,9 @@ import {
 import { deleteUploadedTaskAttachmentRequest } from "@/features/task/hooks/task.api";
 import type { RepeatUnit } from "@/features/task/constants/repeat-unit.constant";
 import type { Task, TaskWithRelations } from "@/features/task/types";
+import { excludeAssigneeFromWatchers } from "@/features/task/utils/exclude-assignee-from-watchers";
 import { editTaskFormSchema } from "@/features/task/validators";
-import { AssigneeCombobox } from "@/components/team/assignee-combobox";
+import { TaskAssigneeField } from "@/components/task/task-assignee-field";
 import {
   TaskAttachmentsField,
   type AttachmentItem,
@@ -166,6 +167,7 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(editTaskFormSchema),
@@ -215,6 +217,20 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
       event.preventDefault();
       pendingFocusIndexRef.current = Math.max(index - 1, 0);
       removeChecklistItem(index);
+    }
+  }
+
+  function handleAssigneeChange(userId: string) {
+    setValue("assignedTo", userId, {
+      shouldDirty: true,
+      shouldValidate: !!errors.assignedTo,
+    });
+
+    const watcherIds = getValues("watcherIds");
+    const nextWatcherIds = excludeAssigneeFromWatchers(watcherIds, userId);
+
+    if (nextWatcherIds.length !== watcherIds.length) {
+      setValue("watcherIds", nextWatcherIds, { shouldDirty: true });
     }
   }
 
@@ -305,7 +321,11 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
       const originalWatcherIds = new Set(
         task.watchers.map((watcher) => watcher.userId),
       );
-      const nextWatcherIds = new Set(values.watcherIds);
+      const watcherIds = excludeAssigneeFromWatchers(
+        values.watcherIds,
+        values.assignedTo,
+      );
+      const nextWatcherIds = new Set(watcherIds);
 
       for (const watcher of task.watchers) {
         if (!nextWatcherIds.has(watcher.userId)) {
@@ -313,7 +333,7 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
         }
       }
 
-      for (const userId of values.watcherIds) {
+      for (const userId of watcherIds) {
         if (!originalWatcherIds.has(userId)) {
           await createWatcher({ taskId: task.id, userId });
         }
@@ -515,26 +535,13 @@ function EditTaskForm({ task, onOpenChange }: EditTaskFormProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="edit-assignedTo">Assignee</Label>
-            <Controller
-              control={control}
-              name="assignedTo"
-              render={({ field }) => (
-                <AssigneeCombobox
-                  id="edit-assignedTo"
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  aria-invalid={!!errors.assignedTo}
-                />
-              )}
-            />
-            {errors.assignedTo && (
-              <p className="text-xs text-destructive">
-                {errors.assignedTo.message}
-              </p>
-            )}
-          </div>
+          <TaskAssigneeField
+            id="edit-assignedTo"
+            value={assignedTo}
+            onValueChange={handleAssigneeChange}
+            error={errors.assignedTo?.message}
+            knownUsers={[task.assignee]}
+          />
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="edit-weightage">Weightage</Label>

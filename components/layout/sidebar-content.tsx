@@ -136,11 +136,11 @@ export function SidebarContent({
         <div className="flex items-center gap-1.5 text-xs text-sidebar-foreground/50">
           <span>Powered by</span>
           <Image
-            src="/bgc-logo.png"
+            src="/bgc-logo-dark.png"
             alt="Business Growth Consultancy"
             width={1721}
             height={366}
-            className="h-4 w-auto bg-white"
+            className="h-6 w-auto"
           />
         </div>
         <a

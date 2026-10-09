@@ -80,8 +80,8 @@ type GetTaskColumnsOptions = {
   // still-open live occurrence -- schedule/status columns say nothing
   // useful there and just crowd out the stop-repeating action.
   showScheduleColumns?: boolean;
-  // Adds a leading checkbox column for bulk selection (e.g. "Mark complete"
-  // on multiple rows at once). Selectability per row is still governed by
+  // Adds a leading checkbox column for bulk selection ("Mark complete" or
+  // "Delete" on multiple rows at once). Selectability per row is still governed by
   // the table's `isRowSelectable`/`enableRowSelection` -- this only decides
   // whether the column itself is rendered.
   enableSelection?: boolean;
@@ -128,15 +128,17 @@ export function getTaskColumns({
     columnHelper.accessor("title", {
       header: "Title",
       cell: ({ row }) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="flex items-center gap-1.5 font-medium text-foreground">
+        <div className="flex max-w-64 flex-col gap-0.5">
+          <span className="flex min-w-0 items-start gap-1.5 font-medium text-foreground">
             {row.original.isRepeating && (
               <Repeat
-                className="size-3.5 shrink-0 text-muted-foreground"
+                className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
                 aria-label="Repeating task"
               />
             )}
-            {row.original.title}
+            <span className="whitespace-normal break-words">
+              {row.original.title}
+            </span>
           </span>
           {row.original.description && (
             <span className="max-w-64 truncate text-xs text-muted-foreground">
@@ -146,36 +148,14 @@ export function getTaskColumns({
         </div>
       ),
     }),
-    showAssigneeColumn &&
-      columnHelper.accessor("assignedTo", {
-        id: "assignedTo",
-        header: "Assignee",
-        cell: ({ getValue }) => {
-          const name = userNames.get(getValue());
-
-          return name ? (
-            <div className="flex items-center gap-2.5">
-              <Avatar size="sm">
-                <AvatarFallback>{initials(name)}</AvatarFallback>
-              </Avatar>
-              <span className="text-foreground">{name}</span>
-            </div>
-          ) : (
-            <span className="text-muted-foreground">Unassigned</span>
-          );
-        },
+    showScheduleColumns &&
+      columnHelper.display({
+        id: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <TaskStatusBadge status={getEffectiveTaskStatus(row.original)} />
+        ),
       }),
-    columnHelper.accessor("createdBy", {
-      id: "assignedBy",
-      header: "Assigned by",
-      cell: ({ getValue }) => (
-        <span className="text-foreground">
-          {userNames.get(getValue()) ?? (
-            <span className="text-muted-foreground">Unknown</span>
-          )}
-        </span>
-      ),
-    }),
     columnHelper.accessor("weightage", {
       header: "Weightage",
       cell: ({ getValue }) => (
@@ -204,13 +184,35 @@ export function getTaskColumns({
           </span>
         ),
       }),
-    showScheduleColumns &&
-      columnHelper.display({
-        id: "status",
-        header: "Status",
-        cell: ({ row }) => (
-          <TaskStatusBadge status={getEffectiveTaskStatus(row.original)} />
-        ),
+    columnHelper.accessor("createdBy", {
+      id: "assignedBy",
+      header: "Assigned by",
+      cell: ({ getValue }) => (
+        <span className="text-foreground">
+          {userNames.get(getValue()) ?? (
+            <span className="text-muted-foreground">Unknown</span>
+          )}
+        </span>
+      ),
+    }),
+    showAssigneeColumn &&
+      columnHelper.accessor("assignedTo", {
+        id: "assignedTo",
+        header: "Assignee",
+        cell: ({ getValue }) => {
+          const name = userNames.get(getValue());
+
+          return name ? (
+            <div className="flex items-center gap-2.5">
+              <Avatar size="sm">
+                <AvatarFallback>{initials(name)}</AvatarFallback>
+              </Avatar>
+              <span className="text-foreground">{name}</span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Unassigned</span>
+          );
+        },
       }),
     showStopRepeating &&
       columnHelper.display({

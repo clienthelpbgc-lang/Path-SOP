@@ -23,3 +23,4 @@ export * from "./create-task-template-preset.type";
 export * from "./update-task-template-preset.type";
 export * from "./list-task-template-presets.type";
 export * from "./task-template-like.type";
+export * from "./bulk-delete-tasks.type";

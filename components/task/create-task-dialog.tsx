@@ -16,8 +16,10 @@ import { useCreateTask } from "@/features/task/hooks";
 import { deleteUploadedTaskAttachmentRequest } from "@/features/task/hooks/task.api";
 import type { RepeatUnit } from "@/features/task/constants/repeat-unit.constant";
 import type { TaskTemplateLike } from "@/features/task/types";
+import { excludeAssigneeFromWatchers } from "@/features/task/utils/exclude-assignee-from-watchers";
 import { createTaskFormSchema } from "@/features/task/validators";
-import { AssigneeCombobox } from "@/components/team/assignee-combobox";
+import { useCurrentUser } from "@/components/providers/current-user-provider";
+import { TaskAssigneeField } from "@/components/task/task-assignee-field";
 import {
   TaskAttachmentsField,
   type AttachmentItem,
@@ -60,11 +62,14 @@ function endOfToday(): Date {
   return date;
 }
 
-function defaultValues(template?: TaskTemplateLike | null): FormInput {
+function defaultValues(
+  template: TaskTemplateLike | null,
+  assignedTo: string,
+): FormInput {
   return {
     title: template?.title ?? "",
     description: template?.description ?? "",
-    assignedTo: "",
+    assignedTo,
     // Templates allow a weightage of 0, tasks don't -- clamp so a prefilled
     // form doesn't fail validation before the user has touched anything.
     weightage: Math.max(1, template?.weightage ?? 1),
@@ -96,13 +101,19 @@ type CreateTaskDialogProps = {
   template?: TaskTemplateLike | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  // Preselects the signed-in user as the assignee, for creating personal
+  // tasks (e.g. from "My Task"). They can still pick someone else.
+  defaultAssignToSelf?: boolean;
 };
 
 export function CreateTaskDialog({
   template = null,
   open: openProp,
   onOpenChange: onOpenChangeProp,
+  defaultAssignToSelf = false,
 }: CreateTaskDialogProps = {}) {
+  const currentUser = useCurrentUser();
+  const defaultAssigneeId = defaultAssignToSelf ? currentUser.id : "";
   const isControlled = openProp !== undefined;
   const [internalOpen, setInternalOpen] = useState(false);
   const open = isControlled ? openProp : internalOpen;
@@ -121,10 +132,11 @@ export function CreateTaskDialog({
     handleSubmit,
     reset,
     setValue,
+    getValues,
     formState: { errors, dirtyFields },
   } = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(createTaskFormSchema),
-    defaultValues: defaultValues(template),
+    defaultValues: defaultValues(template, defaultAssigneeId),
   });
 
   const assignedTo = useWatch({ control, name: "assignedTo" });
@@ -187,7 +199,7 @@ export function CreateTaskDialog({
     setOpen(nextOpen);
 
     if (!nextOpen) {
-      reset(defaultValues(template));
+      reset(defaultValues(template, defaultAssigneeId));
 
       for (const item of attachmentItems) {
         if (item.status === "done" && item.fileKey) {
@@ -239,7 +251,10 @@ export function CreateTaskDialog({
         checklistItems,
         reminders,
         attachments,
-        watcherIds: values.watcherIds,
+        watcherIds: excludeAssigneeFromWatchers(
+          values.watcherIds,
+          values.assignedTo,
+        ),
         templateId: template?.id,
       },
       {
@@ -247,7 +262,7 @@ export function CreateTaskDialog({
           // Bypass onOpenChange's cleanup: these attachments are now
           // genuinely attached to the created task, not orphaned uploads.
           setOpen(false);
-          reset(defaultValues(template));
+          reset(defaultValues(template, defaultAssigneeId));
           setAttachmentItems([]);
           setReminders(template?.reminders ?? []);
         },
@@ -258,6 +273,20 @@ export function CreateTaskDialog({
   const isUploadingAttachments = attachmentItems.some(
     (item) => item.status === "uploading",
   );
+
+  function handleAssigneeChange(userId: string) {
+    setValue("assignedTo", userId, {
+      shouldDirty: true,
+      shouldValidate: !!errors.assignedTo,
+    });
+
+    const watcherIds = getValues("watcherIds");
+    const nextWatcherIds = excludeAssigneeFromWatchers(watcherIds, userId);
+
+    if (nextWatcherIds.length !== watcherIds.length) {
+      setValue("watcherIds", nextWatcherIds, { shouldDirty: true });
+    }
+  }
 
   // `startAt` defaults to the moment the dialog opened, which can go stale
   // by the time the user actually submits (filling out the rest of the
@@ -290,7 +319,7 @@ export function CreateTaskDialog({
           <DialogDescription>
             {template
               ? `Prefilled from the "${template.name}" template. Adjust anything before creating.`
-              : "Assign a new task to a team member with a due date."}
+              : "Create a task for yourself or assign it to a team member."}
           </DialogDescription>
         </DialogHeader>
 
@@ -433,26 +462,12 @@ export function CreateTaskDialog({
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="assignedTo">Assignee</Label>
-                <Controller
-                  control={control}
-                  name="assignedTo"
-                  render={({ field }) => (
-                    <AssigneeCombobox
-                      id="assignedTo"
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      aria-invalid={!!errors.assignedTo}
-                    />
-                  )}
-                />
-                {errors.assignedTo && (
-                  <p className="text-xs text-destructive">
-                    {errors.assignedTo.message}
-                  </p>
-                )}
-              </div>
+              <TaskAssigneeField
+                id="assignedTo"
+                value={assignedTo}
+                onValueChange={handleAssigneeChange}
+                error={errors.assignedTo?.message}
+              />
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="weightage">Weightage</Label>

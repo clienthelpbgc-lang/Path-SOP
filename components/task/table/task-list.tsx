@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { ListChecks, X } from "lucide-react";
+import { ListChecks } from "lucide-react";
 import type { RowSelectionState } from "@tanstack/react-table";
 
 import { useTasks } from "@/features/task/hooks";
 import type { Task } from "@/features/task/types";
 import { canCompleteTask } from "@/features/task/utils/can-complete-task";
+import { canDeleteTask } from "@/features/task/utils/can-delete-task";
 import { useUsers } from "@/features/user/hooks";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { PagePlaceholder } from "@/components/layout/page-placeholder";
 import { BulkCompleteTasksDialog } from "@/components/task/bulk-complete-tasks-dialog";
+import { BulkDeleteTasksDialog } from "@/components/task/bulk-delete-tasks-dialog";
 import {
   EMPTY_TASK_FILTERS,
   hasActiveTaskFilters,
@@ -19,41 +21,11 @@ import {
 } from "@/components/task/table/task-table-tools";
 import { getTaskColumns } from "@/components/task/table/task-columns";
 import { TaskPagination } from "@/components/task/table/task-pagination";
+import { TaskSelectionBar } from "@/components/task/table/task-selection-bar";
 import { TaskTable } from "@/components/task/table/task-table";
 import { TaskDetailsSheet } from "@/components/task/task-details-sheet";
-import { Button } from "@/components/ui/button";
 
 const PAGE_SIZE = 20;
-
-type TaskSelectionBarProps = {
-  count: number;
-  onComplete: () => void;
-  onClear: () => void;
-};
-
-function TaskSelectionBar({ count, onComplete, onClear }: TaskSelectionBarProps) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-2.5">
-      <p className="text-sm font-medium text-foreground">
-        {count} task{count === 1 ? "" : "s"} selected
-      </p>
-      <div className="flex items-center gap-2">
-        <Button type="button" size="sm" onClick={onComplete}>
-          Mark complete
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Clear selection"
-          onClick={onClear}
-        >
-          <X />
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 type TaskListProps = {
   currentUserId: string;
@@ -75,7 +47,9 @@ export function TaskList({
   const [page, setPage] = useState(1);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [bulkCompleteOpen, setBulkCompleteOpen] = useState(false);
+  const [bulkAction, setBulkAction] = useState<"complete" | "delete" | null>(
+    null,
+  );
   const debouncedSearch = useDebouncedValue(filters.search, 300);
 
   // Selection is scoped to what's currently on screen -- once the page or
@@ -121,7 +95,7 @@ export function TaskList({
   );
 
   const showAssigneeColumn = scope === "all";
-  // Bulk-complete only makes sense where rows carry a real, completable
+  // Bulk actions only make sense where rows carry a real, actionable
   // status -- the "Repeating Tasks" view already opts out of that (see
   // showScheduleColumns above).
   const enableSelection = !onlyRepeating;
@@ -136,6 +110,12 @@ export function TaskList({
   });
 
   const selectedTasks = tasks.filter((task) => rowSelection[task.id]);
+  const completableTasks = selectedTasks.filter((task) =>
+    canCompleteTask(task, currentUserId),
+  );
+  const deletableTasks = selectedTasks.filter((task) =>
+    canDeleteTask(task, currentUserId),
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -163,8 +143,11 @@ export function TaskList({
         <>
           {selectedTasks.length > 0 && (
             <TaskSelectionBar
-              count={selectedTasks.length}
-              onComplete={() => setBulkCompleteOpen(true)}
+              selectedCount={selectedTasks.length}
+              completableCount={completableTasks.length}
+              deletableCount={deletableTasks.length}
+              onComplete={() => setBulkAction("complete")}
+              onDelete={() => setBulkAction("delete")}
               onClear={() => setRowSelection({})}
             />
           )}
@@ -178,7 +161,9 @@ export function TaskList({
             onRowSelectionChange={enableSelection ? setRowSelection : undefined}
             isRowSelectable={
               enableSelection
-                ? (task) => canCompleteTask(task, currentUserId)
+                ? (task) =>
+                    canCompleteTask(task, currentUserId) ||
+                    canDeleteTask(task, currentUserId)
                 : undefined
             }
           />
@@ -199,9 +184,14 @@ export function TaskList({
       />
 
       <BulkCompleteTasksDialog
-        tasks={bulkCompleteOpen ? selectedTasks : null}
-        onOpenChange={setBulkCompleteOpen}
+        tasks={bulkAction === "complete" ? completableTasks : null}
+        onOpenChange={(open) => !open && setBulkAction(null)}
         onCompleted={() => setRowSelection({})}
+      />
+      <BulkDeleteTasksDialog
+        tasks={bulkAction === "delete" ? deletableTasks : null}
+        onOpenChange={(open) => !open && setBulkAction(null)}
+        onDeleted={() => setRowSelection({})}
       />
     </div>
   );
